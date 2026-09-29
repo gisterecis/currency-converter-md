@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>maib converter test page</title>
+  <style>
+    body { font: 16px/1.6 system-ui, sans-serif; max-width: 760px; margin: 32px auto; padding: 0 16px; }
+    li { margin: 4px 0; }
+    code { background: #f2f2f2; padding: 1px 5px; border-radius: 4px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 12px 16px; margin: 16px 0; }
+  </style>
+</head>
+<body>
+  <h1>maib converter test page</h1>
+  <p>Select an amount, right-click, and pick <em>Convert … to</em>.</p>
+
+  <h2>Currency detected</h2>
+  <ul>
+    <li>Laptop: <span>1.234,56 €</span></li>
+    <li>Headphones: <span>$1,234.56</span></li>
+    <li>Rent: <span>7 500 lei</span></li>
+    <li>Swiss watch: <span>1'234.50 CHF</span></li>
+    <li>Train ticket: <span>£ 99.99</span></li>
+    <li>Groceries in Kyiv: <span>2 500 грн</span></li>
+    <li>Hotel in Iași: <span>350 RON</span></li>
+  </ul>
+
+  <h2>No currency (menu asks for the source)</h2>
+  <ul>
+    <li>Plain: <span>1 250,50</span></li>
+    <li>Decimal comma: <span>12,5</span></li>
+    <li>Big: <span>1.234.567</span></li>
+  </ul>
+
+  <h2>Ambiguous (box shows both readings)</h2>
+  <ul>
+    <li><span>1,234 EUR</span></li>
+    <li><span>1.500 USD</span></li>
+  </ul>
+
+  <h2>Inside form fields</h2>
+  <p><input value="2 499,99 lei" size="20"> <textarea rows="2" cols="24">Total: 45 euro</textarea></p>
+
+  <div class="card" style="position: relative; transform: translateZ(0); overflow: hidden;">
+    Inside a clipped, transformed container: <span>€ 89.90</span>
+  </div>
+
+  <p style="margin-top: 900px">Near the bottom of the page (box should open above): <span>3 000 USD</span></p>
+</body>
+</html>

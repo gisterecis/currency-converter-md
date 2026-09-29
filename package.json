@@ -1,0 +1,28 @@
+{
+  "name": "firefox-maib-converter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firefox add-on: convert selected amounts at maib.md exchange rates",
+  "scripts": {
+    "test": "node --test",
+    "e2e": "node tests/e2e/run.mjs",
+    "lint": "web-ext lint",
+    "build": "web-ext build --overwrite-dest --filename maib-converter-{version}.xpi",
+    "start": "web-ext run --firefox=/usr/bin/firefox-esr --start-url tests/manual.html",
+    "sign": "web-ext sign --channel=unlisted"
+  },
+  "webExt": {
+    "ignoreFiles": [
+      "tests",
+      "node_modules",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      "web-ext-artifacts"
+    ]
+  },
+  "devDependencies": {
+    "linkedom": "^0.18.13",
+    "web-ext": "^10.7.0"
+  }
+}
