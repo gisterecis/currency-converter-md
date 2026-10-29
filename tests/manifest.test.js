@@ -38,8 +38,10 @@ test("every bank file is a background script, after the registry and before rate
   for (const s of scripts) assert.ok(fs.existsSync(path.join(ROOT, s)), s);
 });
 
-test("both manifests share name, locale, options page and icons", () => {
-  for (const k of ["name", "description", "default_locale", "options_ui"]) assert.deepEqual(chrome[k], manifest[k], k);
+test("both manifests share name, locale, options page, toolbar popup, shortcut and icons", () => {
+  for (const k of ["name", "description", "default_locale", "options_ui", "action", "commands"]) assert.deepEqual(chrome[k], manifest[k], k);
+  assert.ok(fs.existsSync(path.join(ROOT, manifest.action.default_popup)));
+  for (const icon of Object.values(manifest.action.default_icon)) assert.ok(fs.existsSync(path.join(ROOT, icon)), icon);
   for (const icon of [...Object.values(chrome.icons), ...Object.values(manifest.icons)]) {
     assert.ok(fs.existsSync(path.join(ROOT, icon)), icon);
   }

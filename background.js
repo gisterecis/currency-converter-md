@@ -6,7 +6,9 @@
 
 const ext = Ext.api;
 const ROOT_ID = "cv-root";
-const DEFAULTS = { bank: Banks.DEFAULT, lang: "auto" };
+// lastForeign: the foreign currency last converted to or from MDL, used by
+// the keyboard shortcut for amounts in lei.
+const DEFAULTS = { bank: Banks.DEFAULT, lang: "auto", lastForeign: "EUR" };
 
 // ---------------------------------------------------------------------------
 // Settings and strings
@@ -25,6 +27,7 @@ async function saveSettings(changes) {
   const clean = {};
   if (changes.bank && Banks.get(changes.bank)) clean.bank = changes.bank;
   if (changes.lang === "auto" || I18n.LANGS.includes(changes.lang)) clean.lang = changes.lang;
+  if (/^[A-Z]{3}$/.test(changes.lastForeign || "") && changes.lastForeign !== "MDL") clean.lastForeign = changes.lastForeign;
   if (Object.keys(clean).length) await settingsArea().set(clean);
 }
 
@@ -38,13 +41,14 @@ async function context() {
 // The picker can use a longer name ("BNM (official rate)"); sentences use bank.name.
 const bankList = (t) => Banks.all().map((b) => ({ id: b.id, name: b.nameKey ? t(b.nameKey) : b.name }));
 
-const BOX_STRINGS = ["boxLabel", "close", "refresh", "settings", "bankLabel", "fromLabel", "toLabel", "swap", "ambiguousNote", "srcGuessed"];
+// Strings for lib/view.js. "copied" and "updatedAgo" keep their $1 for the view to fill.
+const VIEW_STRINGS = [
+  "appName", "boxLabel", "close", "refresh", "settings", "bankLabel", "fromLabel", "toLabel", "swap", "amountLabel",
+  "enterAmount", "ambiguousNote", "srcGuessed", "copyHint", "copied", "copyFailed", "best", "justNow", "updatedAgo",
+  "publishedRates",
+];
 
-function boxStrings(t, bank) {
-  const out = Object.fromEntries(BOX_STRINGS.map((k) => [k, t(k)]));
-  out.loading = t("loading", bank.name);
-  return out;
-}
+const viewStrings = (t) => Object.fromEntries(VIEW_STRINGS.map((k) => [k, t(k)]));
 
 function errorText(err, bank, t) {
   const { name } = bank;
@@ -219,10 +223,9 @@ function resolveSource(request, parsed) {
 async function computeModel(request, { force = false } = {}) {
   const { lang, t, bank: selected } = await context();
   const bank = Banks.get(request.bank) || selected;
+  // No number (an emptied amount field, say) still gets a model, so the box
+  // keeps its pickers and shows a hint.
   const parsed = CurrencyParse.parseSelection(request.selection || "");
-  if (!parsed) {
-    return { title: t("appName"), request, bank, banks: bankList(t), currencies: [], readings: [], footer: [], error: t("errNoNumber") };
-  }
   const { src, guessed } = resolveSource(request, parsed);
   let result = { rates: null, fetchedAt: null, stale: false, error: null };
   try {
@@ -248,7 +251,7 @@ async function computeModel(request, { force = false } = {}) {
 }
 
 async function showConversion({ request, tab, frameId, targetElementId }) {
-  const { lang, t, bank } = await context();
+  const { lang, t } = await context();
   const parsed = CurrencyParse.parseSelection(request.selection);
   const title = parsed ? `${parsed.text}${request.src ? ` ${request.src}` : ""} → ${request.dst}` : t("appName");
   const send = (msg) => ext.tabs.sendMessage(tab.id, msg, { frameId });
@@ -256,8 +259,8 @@ async function showConversion({ request, tab, frameId, targetElementId }) {
   let inPage = false;
   if (tab && tab.id >= 0) {
     try {
-      await ext.scripting.executeScript({ target: { tabId: tab.id, frameIds: [frameId] }, files: ["content/box.js"] });
-      await send({ type: "cv-open", title, request, targetElementId, strings: boxStrings(t, bank), lang });
+      await ext.scripting.executeScript({ target: { tabId: tab.id, frameIds: [frameId] }, files: ["lib/view.js", "content/box.js"] });
+      await send({ type: "cv-open", title, request, targetElementId, strings: viewStrings(t), lang });
       inPage = true;
     } catch (e) {
       console.info("can't show the box in this page, using a notification", e);
@@ -281,17 +284,71 @@ async function showConversion({ request, tab, frameId, targetElementId }) {
   });
 }
 
-// The box changed bank / currencies or asked for fresh rates. A bank picked
-// in the box becomes the default.
+// The box or popup changed the amount, bank or currencies, or asked for fresh
+// rates. A bank picked there becomes the default.
 async function convertFromBox({ request, force }) {
   const { settings } = await context();
-  if (request.bank && request.bank !== settings.bank) await saveSettings({ bank: request.bank });
+  const changes = {};
+  if (request.bank && request.bank !== settings.bank) changes.bank = request.bank;
+  const foreign = request.src === "MDL" ? request.dst : request.dst === "MDL" ? request.src : null;
+  if (foreign && foreign !== "MDL" && foreign !== settings.lastForeign) changes.lastForeign = foreign;
+  await saveSettings(changes);
   return computeModel(request, { force: !!force });
+}
+
+// ---------------------------------------------------------------------------
+// Keyboard shortcut: convert the selection in the active tab without the menu
+// (amounts in lei go to the last foreign currency, others to lei). With
+// nothing selected, open the toolbar converter.
+
+async function readSelection(tabId) {
+  const func = () => {
+    const el = document.activeElement;
+    if (el && /^(INPUT|TEXTAREA)$/.test(el.tagName) && typeof el.selectionStart === "number") {
+      return el.value.slice(el.selectionStart, el.selectionEnd);
+    }
+    return String(getSelection() || "");
+  };
+  // Frames the extension can't script make allFrames fail; then try the page itself.
+  for (const target of [{ tabId, allFrames: true }, { tabId, frameIds: [0] }]) {
+    try {
+      const results = await ext.scripting.executeScript({ target, func });
+      const hit = results.find((r) => r && typeof r.result === "string" && r.result.trim());
+      return hit ? { selection: hit.result, frameId: hit.frameId || 0 } : { selection: "", frameId: 0 };
+    } catch (e) {
+      // Next target.
+    }
+  }
+  return { selection: "", frameId: 0 };
+}
+
+async function convertSelectionInTab(tab) {
+  const { selection, frameId } = tab && tab.id >= 0 ? await readSelection(tab.id) : { selection: "", frameId: 0 };
+  const parsed = selection.trim() && CurrencyParse.parseSelection(selection);
+  if (!parsed) {
+    if (ext.action && ext.action.openPopup) await ext.action.openPopup().catch(() => {});
+    return;
+  }
+  const { settings } = await context();
+  const src = parsed.currency || null;
+  const dst = src && src !== "MDL" ? "MDL" : settings.lastForeign;
+  await showConversion({ request: { selection, src, dst }, tab, frameId });
+}
+
+if (ext.commands) {
+  ext.commands.onCommand.addListener(async (command, tab) => {
+    if (command !== "convert-selection") return;
+    const active = tab || (await ext.tabs.query({ active: true, currentWindow: true }))[0];
+    convertSelectionInTab(active);
+  });
 }
 
 async function optionsData() {
   const { settings, lang, t } = await context();
-  const keys = ["optionsTitle", "optIntro", "optBank", "optLang", "optLangAuto", "optSaved", "optDisclaimer", "optPrivacy", "appName"];
+  const keys = [
+    "optionsTitle", "optIntro", "optBank", "optLang", "optLangAuto", "optSaved", "optDisclaimer", "optPrivacy", "appName",
+    "optShortcut", "optShortcutHelp", "optShortcutNone", "optShortcutChange", "optAbout", "extName",
+  ];
   return { settings, lang, banks: bankList(t), strings: Object.fromEntries(keys.map((k) => [k, t(k)])) };
 }
 
@@ -304,6 +361,8 @@ Ext.onMessage((msg) => {
       return ext.runtime.openOptionsPage();
     case "cv-options-data":
       return optionsData();
+    case "cv-popup-data":
+      return context().then(({ lang, t, settings }) => ({ lang, strings: viewStrings(t), bank: settings.bank }));
     case "cv-save-settings":
       return saveSettings(msg.settings || {}).then(optionsData);
     default:

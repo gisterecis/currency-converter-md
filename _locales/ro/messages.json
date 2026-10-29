@@ -74,9 +74,6 @@
   "ratesOf": {
     "message": "Cursul $1"
   },
-  "updatedAt": {
-    "message": "actualizat la $1"
-  },
   "feeNote": {
     "message": "* include taxa de 0,1% la cumpărarea valutei în numerar"
   },
@@ -175,5 +172,53 @@
   },
   "optPrivacy": {
     "message": "Extensia nu colectează date: textul selectat este procesat doar în browserul tău."
+  },
+  "updatedAgo": {
+    "message": "actualizat $1"
+  },
+  "justNow": {
+    "message": "chiar acum"
+  },
+  "amountLabel": {
+    "message": "Suma"
+  },
+  "enterAmount": {
+    "message": "Suma"
+  },
+  "noNumberHint": {
+    "message": "Nu am găsit nicio sumă. Scrie-o mai sus."
+  },
+  "copyHint": {
+    "message": "Click ca să copiezi suma"
+  },
+  "copied": {
+    "message": "Copiat: $1"
+  },
+  "copyFailed": {
+    "message": "Nu s-a putut copia"
+  },
+  "best": {
+    "message": "cel mai bun"
+  },
+  "cmdConvert": {
+    "message": "Convertește textul selectat"
+  },
+  "optShortcut": {
+    "message": "Scurtătură de tastatură"
+  },
+  "optShortcutHelp": {
+    "message": "Convertește textul selectat fără meniu. Fără selecție, deschide convertorul din bara de instrumente."
+  },
+  "optShortcutNone": {
+    "message": "nesetată"
+  },
+  "optShortcutChange": {
+    "message": "Schimbă"
+  },
+  "optAbout": {
+    "message": "Despre"
+  },
+  "publishedRates": {
+    "message": "Cursul publicat"
   }
 }

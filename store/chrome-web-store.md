@@ -30,8 +30,8 @@ The package is `web-ext-artifacts/convertor-valutar-md-chrome-<version>.zip` (`n
 
 | Permission | Justification |
 | --- | --- |
-| `contextMenus` | Adds "Convert “selection” to ▸ currency" to the right-click menu for selected text. This is the extension's only entry point. |
-| `activeTab` | After the user picks a menu item, shows the conversion result in a small box next to the selection on the current page. No access to any page otherwise. |
+| `contextMenus` | Adds "Convert “selection” to ▸ currency" to the right-click menu for selected text, the main way to use the extension (the others are the toolbar button and a keyboard shortcut, which need no permission). |
+| `activeTab` | After the user picks a menu item or presses the shortcut, reads the selection and shows the conversion result in a small box next to it on the current page. No access to any page otherwise. |
 | `scripting` | Injects the result box into the current tab (under activeTab) after a menu click, and reads the rate tables from a bank's page opened in a background tab when that bank's site requires a browser check (maib, Eximbank). |
 | `storage` | Saves the user's chosen bank and language, and caches each bank's rates for one hour to avoid repeated requests. |
 | `notifications` | Shows the result as a system notification on pages where extensions can't draw (chrome:// pages, the PDF viewer, the Web Store). |

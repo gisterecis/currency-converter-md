@@ -74,9 +74,6 @@
   "ratesOf": {
     "message": "Курс $1"
   },
-  "updatedAt": {
-    "message": "обновлено в $1"
-  },
   "feeNote": {
     "message": "* включая сбор 0,1% при покупке наличной валюты"
   },
@@ -175,5 +172,53 @@
   },
   "optPrivacy": {
     "message": "Расширение не собирает данные: выделенный текст обрабатывается только в вашем браузере."
+  },
+  "updatedAgo": {
+    "message": "обновлено $1"
+  },
+  "justNow": {
+    "message": "только что"
+  },
+  "amountLabel": {
+    "message": "Сумма"
+  },
+  "enterAmount": {
+    "message": "Сумма"
+  },
+  "noNumberHint": {
+    "message": "Сумма не найдена. Введите её выше."
+  },
+  "copyHint": {
+    "message": "Нажмите, чтобы скопировать сумму"
+  },
+  "copied": {
+    "message": "Скопировано: $1"
+  },
+  "copyFailed": {
+    "message": "Не удалось скопировать"
+  },
+  "best": {
+    "message": "лучший"
+  },
+  "cmdConvert": {
+    "message": "Конвертировать выделенный текст"
+  },
+  "optShortcut": {
+    "message": "Сочетание клавиш"
+  },
+  "optShortcutHelp": {
+    "message": "Конвертирует выделенный текст без меню. Без выделения открывает конвертер на панели."
+  },
+  "optShortcutNone": {
+    "message": "не задано"
+  },
+  "optShortcutChange": {
+    "message": "Изменить"
+  },
+  "optAbout": {
+    "message": "О расширении"
+  },
+  "publishedRates": {
+    "message": "Опубликованный курс"
   }
 }

@@ -76,8 +76,9 @@ test("model has both readings for ambiguous numbers", () => {
   assert.equal(m.readings[0].sections[0].rows[0].label, "Sell 1,234 EUR, you get");
   assert.equal(m.readings[0].sections[1].label, "Card operations");
   assert.ok(m.anyFee);
-  assert.deepEqual(m.footer.slice(1), ["Cash: EUR 20.00 / 20.28", "Card: EUR 19.9299 / 20.3814", "* includes the 0.1% fee on buying foreign cash"]);
-  assert.match(m.footer[0], /^maib rates for 29\.10\.2026 · updated /);
+  assert.deepEqual(m.rateLines, ["Cash: EUR 20.00 / 20.28", "Card: EUR 19.9299 / 20.3814"]);
+  assert.deepEqual(m.notes, ["* includes the 0.1% fee on buying foreign cash"]);
+  assert.equal(m.dateLine, "maib rates for 29.10.2026");
   assert.match(modelToText(m, translator("en")), /If 1,234 EUR:/);
 });
 
@@ -109,7 +110,9 @@ test("official rate has a single row and no fee", () => {
   assert.equal(s.label, "BNM official rate");
   assert.deepEqual(s.rows.map((r) => [r.label, r.value]), [["At the official rate", "2,013.03 MDL"]]);
   assert.equal(m.anyFee, false);
-  assert.deepEqual(m.footer.slice(1), ["BNM: EUR 20.1303"]);
+  assert.deepEqual(m.rateLines, ["BNM: EUR 20.1303"]);
+  assert.deepEqual(m.notes, []);
+  assert.equal(s.rows[0].rate, "1 EUR = 20.1303 MDL");
 });
 
 test("errors and stale rates are spelled out", () => {
@@ -123,11 +126,53 @@ test("errors and stale rates are spelled out", () => {
 test("bank note goes in the footer", () => {
   const parsed = { text: "5", currency: "EUR", ambiguous: false, candidates: [5] };
   const m = model({ parsed, src: "EUR", dst: "MDL", bank: { ...bank, noteKey: "noteEnergbank" } });
-  assert.equal(m.footer[m.footer.length - 1], "Central Office rates. Other branches may differ.");
+  assert.equal(m.notes[m.notes.length - 1], "Central Office rates. Other branches may differ.");
 });
 
 test("currency names follow the language", () => {
   assert.equal(currencyName("MDL", "ro"), "leu moldovenesc");
   assert.equal(currencyName("MDL", "ru"), "молдавский лей");
   assert.equal(currencyName("MDL", "en"), "Moldovan Leu");
+});
+
+test("each result carries what the box copies and the effective rate", () => {
+  const parsed = { text: "100", currency: "EUR", ambiguous: false, candidates: [100] };
+  const [get, pay] = model({ parsed, src: "EUR", dst: "MDL" }).readings[0].sections[0].rows;
+  assert.equal(get.number, "2,000.00");
+  assert.equal(get.currency, "MDL");
+  assert.equal(get.rate, "1 EUR = 20.00 MDL");
+  assert.equal(pay.rate, "1 EUR = 20.3003 MDL"); // 20.28 plus the 0.1% fee
+  const lei = model({ parsed: { ...parsed, currency: "MDL" }, src: "MDL", dst: "EUR", lang: "ro", t: translator("ro") });
+  // Quoted per euro, not per leu.
+  assert.equal(lei.readings[0].sections[0].rows[1].rate, "1 EUR = 20,00 MDL");
+});
+
+test("best rate badge: most received, least paid, only when there's a choice", () => {
+  const parsed = { text: "100", currency: "EUR", ambiguous: false, candidates: [100] };
+  const [cash, card] = model({ parsed, src: "EUR", dst: "MDL" }).readings[0].sections;
+  // Selling: cash 2000 vs card 1992.99. Buying: cash 2030.03 vs card 2038.14.
+  assert.deepEqual([cash.rows[0].best, card.rows[0].best], [true, false]);
+  assert.deepEqual([cash.rows[1].best, card.rows[1].best], [true, false]);
+  const onlyCash = model({ parsed, src: "EUR", dst: "MDL", rates: { ...rates, tables: { cash: rates.tables.cash } } });
+  assert.ok(onlyCash.readings[0].sections[0].rows.every((r) => !r.best));
+  const tie = { ...rates, tables: { cash: { EUR: { buy: 20, sell: 20.5 } }, card: { EUR: { buy: 20, sell: 20.5 } } } };
+  const flat = model({ parsed, src: "EUR", dst: "MDL", rates: tie }).readings[0].sections.flatMap((s) => s.rows);
+  assert.ok(flat.filter((r) => r.key === "get").every((r) => !r.best), "a tie gets no badge");
+});
+
+test("no number still gives pickers and a hint", () => {
+  const m = model({ selection: "abc", parsed: null, src: "EUR", dst: "MDL" });
+  assert.equal(m.hint, "No amount found. Type one above.");
+  assert.equal(m.readings.length, 0);
+  assert.deepEqual(m.currencies.map((c) => c.code), ["MDL", "EUR", "USD", "GBP"]);
+  assert.equal(m.amountText, "abc");
+  assert.equal(modelToText(m, translator("en")), m.hint);
+});
+
+test("the model carries what the view needs for 'updated … ago'", () => {
+  const parsed = { text: "5", currency: "EUR", ambiguous: false, candidates: [5] };
+  const m = model({ parsed, src: "EUR", dst: "MDL", lang: "ru", t: translator("ru") });
+  assert.equal(m.locale, "ru-MD");
+  assert.equal(m.fetchedAt, Date.UTC(2026, 9, 29, 12, 0));
+  assert.equal(m.amountText, "5");
 });

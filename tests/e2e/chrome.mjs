@@ -5,7 +5,7 @@
 // With --store it also saves the Chrome Web Store screenshots (1280×800) to
 // store/screenshots/.
 // Usage: node scripts/build.mjs && node tests/e2e/chrome.mjs [outDir] [--store]
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
@@ -51,6 +51,8 @@ const chrome = spawn(
     "--no-first-run",
     "--no-default-browser-check",
     "--lang=en-US",
+    // Headless Chromium says "HeadlessChrome", which bot checks treat differently from real users.
+    "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/156.0.0.0 Safari/537.36",
     "--window-size=1280,800",
     `--disable-extensions-except=${EXT}`,
     `--load-extension=${EXT}`,
@@ -106,6 +108,22 @@ async function openPage(url) {
   return { targetId, sessionId };
 }
 
+// The toolbar popup as a page, sized like the real one.
+async function openPopup(extId) {
+  const page = await openPage(`chrome-extension://${extId}/popup/popup.html`);
+  const height = await evaluate(
+    page.sessionId,
+    `for (let i = 0; i < 50; i++) {
+       const c = document.getElementById("app").shadowRoot && document.getElementById("app").shadowRoot.querySelector(".card");
+       if (c && !c.classList.contains("busy") && c.querySelector(".tile:not(.sk)")) break;
+       await new Promise((r) => setTimeout(r, 200));
+     }
+     return document.getElementById("app").getBoundingClientRect().height;`
+  );
+  await cmd("Emulation.setDeviceMetricsOverride", { width: 380, height: Math.ceil(Math.min(600, height)), deviceScaleFactor: 1, mobile: false }, page.sessionId);
+  return page;
+}
+
 async function shot(session, name, dir = OUT) {
   fs.mkdirSync(dir, { recursive: true });
   const { data } = await cmd("Page.captureScreenshot", { format: "png" }, session);
@@ -117,18 +135,19 @@ async function shot(session, name, dir = OUT) {
 // The box's shadow root is closed; the protocol can still see inside it.
 async function boxNodes(session) {
   const { root } = await cmd("DOM.getDocument", { depth: -1, pierce: true }, session);
-  const found = { host: null, shadow: null, bank: null };
+  const found = { host: null, shadow: null, bank: null, amount: null, head: null, tiles: [] };
   (function walk(n, inBox) {
     if (n.nodeName === "CV-CONVERTER-BOX") {
       found.host = n;
       found.shadow = (n.shadowRoots || [])[0] || null;
       inBox = true;
     }
-    if (inBox && n.nodeName === "SELECT") {
-      const attrs = n.attributes || [];
-      const cls = attrs[attrs.indexOf("class") + 1];
-      if (attrs.includes("class") && cls === "bank") found.bank = n;
-    }
+    const attrs = n.attributes || [];
+    const cls = attrs.includes("class") ? attrs[attrs.indexOf("class") + 1] : "";
+    if (inBox && n.nodeName === "SELECT" && cls === "bank") found.bank = n;
+    if (inBox && n.nodeName === "INPUT" && cls === "amount") found.amount = n;
+    if (inBox && n.nodeName === "HEADER") found.head = n;
+    if (inBox && n.nodeName === "BUTTON" && /^tile\b/.test(cls)) found.tiles.push(n);
     for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) walk(c, inBox);
   })(root, false);
   return found;
@@ -140,9 +159,32 @@ async function callOn(session, node, fn, ...values) {
   return r.result.value;
 }
 
+// Text of the box once it shows results (not the loading skeleton), or null.
 async function boxText(session) {
   const { shadow } = await boxNodes(session);
-  return shadow ? callOn(session, shadow, "function () { return this.textContent; }") : null;
+  if (!shadow) return null;
+  return callOn(session, shadow, `function () {
+    const card = this.querySelector(".card");
+    return card && !card.classList.contains("busy") && card.querySelector(".tile:not(.sk), .alert") ? card.textContent : null;
+  }`);
+}
+
+async function waitFor(fn, ms = 10000) {
+  for (const end = Date.now() + ms; Date.now() < end; await sleep(200)) {
+    const v = await fn();
+    if (v) return v;
+  }
+  return fn();
+}
+
+// A real mouse click (copying needs a user gesture).
+async function clickNode(session, node, dx = 0, dy = 0) {
+  const { model } = await cmd("DOM.getBoxModel", { backendNodeId: node.backendNodeId }, session);
+  const [x1, y1, x2, , , y3] = model.border;
+  const x = (x1 + x2) / 2 + dx;
+  const y = (y1 + y3) / 2 + dy;
+  for (const type of ["mousePressed", "mouseReleased"]) await cmd("Input.dispatchMouseEvent", { type, x, y, button: "left", clickCount: 1 }, session);
+  return { x, y };
 }
 
 async function selectText(session, text) {
@@ -220,30 +262,60 @@ try {
   const findTab = `(await chrome.tabs.query({})).find((t) => t.url && t.url.startsWith(${JSON.stringify(PAGE)}))`;
   const click = async (session, findTabExpr, menuItemId, text) => {
     await bgEval(`const tab = ${findTabExpr}; onMenuClicked({menuItemId: ${JSON.stringify(menuItemId)}, selectionText: ${JSON.stringify(text)}, frameId: 0}, tab); return true;`);
-    for (let i = 0; i < 40; i++) {
-      await sleep(250);
-      const t = await boxText(session);
-      if (t && !/Se încarcă|Fetching|Загружаем/.test(t)) return t;
-    }
-    return boxText(session);
+    await sleep(300);
+    return waitFor(() => boxText(session));
   };
 
   check(await selectText(page.sessionId, "1.234,56 €"), "selected 1.234,56 €");
   let text = await click(page.sessionId, findTab, "to:MDL", "1.234,56 €");
-  check(text && text.includes("Numerar la sucursale") && text.includes("Vinzi 1.234,56 EUR, primești") && text.includes("MDL"), "box shows maib cash and card in Romanian", text && text.slice(0, 160));
+  check(text && text.includes("Numerar la sucursale") && text.includes("Operațiuni cu cardul") && text.includes("Vinzi EUR, primești") && text.includes("cel mai bun"), "box shows maib cash and card tiles in Romanian", text && text.slice(0, 200));
   await shot(page.sessionId, "chrome-box-ro-maib.png");
 
   const { bank: bankSelect } = await boxNodes(page.sessionId);
   check(!!bankSelect, "box has a bank picker");
   await callOn(page.sessionId, bankSelect, "function (v) { this.value = v; this.dispatchEvent(new Event('change')); }", "victoriabank");
-  for (let i = 0; i < 40; i++) {
-    await sleep(250);
-    text = await boxText(page.sessionId);
-    if (text && text.includes("Online / aplicație")) break;
-  }
+  text = await waitFor(async () => {
+    const t = await boxText(page.sessionId);
+    return t && t.includes("Online / aplicație") ? t : null;
+  });
   check(text && text.includes("Victoriabank") && text.includes("Online / aplicație"), "switching the bank in the box re-renders", text && text.slice(0, 160));
   check((await bgEval("return (await getSettings()).bank;")) === "victoriabank", "bank picked in the box is saved");
   await shot(page.sessionId, "chrome-box-ro-victoriabank.png");
+
+  // Expected numbers come from the rates the extension fetched (they're live).
+  const roMoney = (v) => new Intl.NumberFormat("ro-MD", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+  const cashBuy = (bank) => bgEval(`return (await BankRates.getRates(${JSON.stringify(bank)})).rates.tables.cash.EUR.buy;`);
+
+  // Editing the amount in the box re-converts it.
+  const vbTwoThousand = roMoney(2000 * (await cashBuy("victoriabank")));
+  const { amount: amountInput } = await boxNodes(page.sessionId);
+  await callOn(page.sessionId, amountInput, "function (v) { this.value = v; this.dispatchEvent(new Event('input')); }", "2 000");
+  text = await waitFor(async () => {
+    const t = await boxText(page.sessionId);
+    return t && t.includes(vbTwoThousand) ? t : null;
+  });
+  check(!!text, "typing a new amount re-converts", `2 000 EUR → ${vbTwoThousand} MDL`);
+
+  // Clicking a result copies it.
+  await cmd("Browser.grantPermissions", { origin: ORIGIN, permissions: ["clipboardReadWrite", "clipboardSanitizedWrite"] });
+  const { tiles } = await boxNodes(page.sessionId);
+  await clickNode(page.sessionId, tiles[0]);
+  const toast = await waitFor(async () => {
+    const { shadow } = await boxNodes(page.sessionId);
+    return callOn(page.sessionId, shadow, "function () { const t = this.querySelector('.toast.show'); return t && t.textContent; }");
+  }, 3000);
+  const clip = await evaluate(page.sessionId, "return navigator.clipboard.readText().catch((e) => 'error: ' + e.message);");
+  check(toast === `Copiat: ${vbTwoThousand} MDL` && clip === vbTwoThousand, "clicking a result copies the number", `toast ${JSON.stringify(toast)}, clipboard ${JSON.stringify(clip)}`);
+
+  // The header drags the box.
+  const { head, host: boxHost } = await boxNodes(page.sessionId);
+  const before = await callOn(page.sessionId, boxHost, "function () { return [parseFloat(this.style.left), parseFloat(this.style.top)]; }");
+  const start = await clickNode(page.sessionId, head, -60, 0);
+  await cmd("Input.dispatchMouseEvent", { type: "mousePressed", x: start.x, y: start.y, button: "left", clickCount: 1 }, page.sessionId);
+  await cmd("Input.dispatchMouseEvent", { type: "mouseMoved", x: start.x + 150, y: start.y + 80, button: "left", buttons: 1 }, page.sessionId);
+  await cmd("Input.dispatchMouseEvent", { type: "mouseReleased", x: start.x + 150, y: start.y + 80, button: "left", clickCount: 1 }, page.sessionId);
+  const after = await callOn(page.sessionId, boxHost, "function () { return [parseFloat(this.style.left), parseFloat(this.style.top)]; }");
+  check(Math.abs(after[0] - before[0] - 150) < 2 && Math.abs(after[1] - before[1] - 80) < 2, "dragging the header moves the box", `${before} -> ${after}`);
 
   check(await selectText(page.sessionId, "1 250,50"), "selected 1 250,50");
   text = await click(page.sessionId, findTab, "to:EUR", "1 250,50");
@@ -252,13 +324,20 @@ try {
   await setSettings({ lang: "ru" });
   check(await selectText(page.sessionId, "£ 99.99"), "selected £ 99.99");
   text = await click(page.sessionId, findTab, "to:EUR", "£ 99.99");
-  check(text && text.includes("Наличные в отделениях") && text.includes("Продаёте 99,99 GBP"), "box in Russian", text && text.slice(0, 160));
+  check(text && text.includes("Наличные в отделениях") && text.includes("Продаёте GBP, получаете") && text.includes("1 GBP ="), "box in Russian", text && text.slice(0, 160));
 
   await setSettings({ lang: "en", bank: "maib" });
   check(await selectText(page.sessionId, "1,234 EUR"), "selected 1,234 EUR");
   text = await click(page.sessionId, findTab, "to:USD", "1,234 EUR");
-  check(text && text.includes("both readings") && text.includes("Cash at branches"), "ambiguous amount shows both readings in English", text && text.slice(0, 160));
+  check(text && text.includes("both readings") && text.includes("1,234 EUR") && text.includes("1.234 EUR") && text.includes("Cash at branches"), "ambiguous amount offers both readings in English", text && text.slice(0, 160));
   await shot(page.sessionId, "chrome-box-en-ambiguous.png");
+
+  // Keyboard shortcut: converts the selection without the menu.
+  await setSettings({ lang: "ro", bank: "maib" });
+  check(await selectText(page.sessionId, "7 500 lei"), "selected 7 500 lei");
+  const lastForeign = await bgEval(`const tab = ${findTab}; await convertSelectionInTab(tab); return (await getSettings()).lastForeign;`);
+  text = await waitFor(() => boxText(page.sessionId));
+  check(text && text.includes(`1 ${lastForeign} =`) && text.includes("Vinzi MDL, primești"), "shortcut converts lei to the last foreign currency", `${lastForeign}: ${text && text.slice(0, 120)}`);
 
   // 6. Pages Chrome doesn't let extensions script: notification instead.
   const notes = JSON.parse(await bgEval(
@@ -277,13 +356,39 @@ try {
   const opts = await openPage(`chrome-extension://${extId}/options/options.html`);
   await sleep(500);
   const optState = JSON.parse(await evaluate(opts.sessionId, `return JSON.stringify({title: document.getElementById("title").textContent, bank: document.getElementById("bank").value, banks: document.getElementById("bank").options.length, lang: document.getElementById("lang").value});`));
-  check(optState.title === "Setări · Convertor valutar MD" && optState.bank === "maib" && optState.banks === 11 && optState.lang === "ro", "settings page renders in Romanian", JSON.stringify(optState));
+  check(optState.title === "Convertor valutar MD" && optState.bank === "maib" && optState.banks === 11 && optState.lang === "ro", "settings page renders in Romanian", JSON.stringify(optState));
+  // Headless Chromium doesn't assign suggested shortcuts, so compare with what it reports.
+  const shortcut = JSON.parse(await waitFor(() => evaluate(opts.sessionId, `const kbd = [...document.querySelectorAll("#shortcut kbd")].map((k) => k.textContent).join("+");
+    const text = document.getElementById("shortcut").textContent;
+    const real = ((await chrome.commands.getAll()).find((c) => c.name === "convert-selection") || {}).shortcut || "";
+    return text ? JSON.stringify({ kbd, text, real }) : null;`), 3000));
+  check(shortcut.real ? shortcut.kbd === shortcut.real : shortcut.text === "nesetată", "settings page shows the shortcut", JSON.stringify(shortcut));
+  await shot(opts.sessionId, "chrome-settings-ro.png");
   await evaluate(opts.sessionId, `const s = document.getElementById("lang"); s.value = "en"; s.dispatchEvent(new Event("change")); await new Promise((r) => setTimeout(r, 500)); return true;`);
   const optEn = await evaluate(opts.sessionId, `return document.getElementById("bank-label").textContent;`);
   check(optEn === "Bank whose rates you use", "settings page switches language", optEn);
   check((await bgEval("return (await getSettings()).lang;")) === "en", "language setting saved");
 
-  // 8. Store screenshots: two conversions on the demo shop page per language.
+  // 8. Toolbar popup: remembers the last conversion, converts as you type.
+  await setSettings({ lang: "ro", bank: "maib" });
+  await bgEval(`await chrome.storage.local.remove("popup:last"); return true;`);
+  const popup = await openPopup(extId);
+  const popupText = () => evaluate(popup.sessionId, `const c = document.getElementById("app").shadowRoot.querySelector(".card");
+    return c && !c.classList.contains("busy") && c.querySelector(".tile:not(.sk)") ? c.textContent : null;`);
+  const maibBuy = await cashBuy("maib");
+  text = await waitFor(popupText);
+  check(text && text.includes("Numerar la sucursale") && text.includes(`1 EUR = ${roMoney(maibBuy)} MDL`), "popup converts 100 EUR at maib", text && text.slice(0, 120));
+  await evaluate(popup.sessionId, `const i = document.getElementById("app").shadowRoot.querySelector(".amount"); i.value = "250"; i.dispatchEvent(new Event("input")); return true;`);
+  text = await waitFor(async () => {
+    const t = await popupText();
+    return t && t.includes(roMoney(250 * maibBuy)) ? t : null;
+  });
+  const saved = JSON.parse(await bgEval(`return JSON.stringify((await chrome.storage.local.get("popup:last"))["popup:last"]);`));
+  check(!!text && saved.selection === "250" && saved.src === "EUR" && saved.dst === "MDL", "popup re-converts as you type and remembers it", JSON.stringify(saved));
+  await shot(popup.sessionId, "chrome-popup-ro.png");
+
+  // 9. Store screenshots per language: two conversions on the demo shop page,
+  //    and the toolbar popup composited over it where Chrome opens it.
   if (STORE) {
     const dir = path.join(ROOT, "store", "screenshots");
     fs.rmSync(dir, { recursive: true, force: true });
@@ -294,14 +399,32 @@ try {
       ["victoriabank", "$849.99", "to:MDL"],
       ["micb", "24 990 lei", "to:EUR"],
     ];
+    const popupExample = { ro: ["1 500", "USD", "MDL"], en: ["1 500", "USD", "MDL"], ru: ["2 000", "EUR", "MDL"] };
     for (const lang of ["ro", "en", "ru"]) {
       for (const [i, [bank, amount, item]] of [[0, shots[0]], [1, lang === "ru" ? shots[2] : shots[1]]]) {
         await setSettings({ lang, bank });
         check(await selectText(demo.sessionId, amount), `demo: selected ${amount}`);
         const t = await click(demo.sessionId, demoTab, item, amount);
-        check(t && !/Nu am putut|Couldn't|Не удалось/.test(t), `demo box ${lang} ${bank}`, t && t.slice(0, 100));
+        check(t && !/Nu am putut|Couldn't|Не удалось/.test(t), `demo box ${lang} ${bank}`, t && t.slice(0, 60));
         await shot(demo.sessionId, `${lang}-${i + 1}.png`, dir);
       }
+      await evaluate(demo.sessionId, `document.querySelector("cv-converter-box")?.remove(); getSelection().removeAllRanges(); return true;`);
+      await shot(demo.sessionId, "demo-plain.png", OUT);
+      const [selection, from, to] = popupExample[lang];
+      await setSettings({ lang, bank: "victoriabank" });
+      await bgEval(`await chrome.storage.local.set({"popup:last": ${JSON.stringify({ selection, src: from, dst: to })}}); return true;`);
+      const pop = await openPopup(extId);
+      await evaluate(pop.sessionId, `document.getElementById("app").shadowRoot.activeElement?.blur(); return true;`);
+      await shot(pop.sessionId, "popup.png", OUT);
+      await cmd("Target.closeTarget", { targetId: pop.targetId });
+      await cmd("Target.activateTarget", { targetId: demo.targetId });
+      execFileSync("convert", [
+        path.join(OUT, "demo-plain.png"),
+        "(", path.join(OUT, "popup.png"), "-bordercolor", "#cfd6de", "-border", "1",
+        "(", "+clone", "-background", "#101828", "-shadow", "28x14+0+10", ")", "+swap", "-background", "none", "-layers", "merge", "+repage", ")",
+        "-gravity", "northeast", "-geometry", "+28+0", "-composite", path.join(dir, `${lang}-3.png`),
+      ]);
+      console.log("screenshot:", path.join(dir, `${lang}-3.png`));
     }
   }
 } catch (e) {
