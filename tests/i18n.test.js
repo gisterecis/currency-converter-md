@@ -36,10 +36,27 @@ test("every key the code uses exists", () => {
     const src = fs.readFileSync(path.join(ROOT, f), "utf8");
     for (const m of src.matchAll(/\bt\("([A-Za-z_]+)"/g)) used.add(m[1]);
     for (const m of src.matchAll(/(?:nameKey|noteKey): "([A-Za-z_]+)"/g)) used.add(m[1]);
-    for (const m of src.matchAll(/\[([^\]]*)\]/g)) for (const k of m[1].matchAll(/"(opt[A-Za-z]+|boxLabel|close|refresh|settings|bankLabel|fromLabel|toLabel|swap|ambiguousNote|srcGuessed|appName)"/g)) used.add(k[1]);
+    // String lists handed to the view and the settings page.
+    for (const list of src.matchAll(/(?:VIEW_STRINGS|const keys) = \[([\s\S]*?)\]/g)) {
+      for (const k of list[1].matchAll(/"([A-Za-z_]+)"/g)) used.add(k[1]);
+    }
   }
   for (const key of ["cash", "card", "online", "official"]) used.add(`cat_${key}`).add(`short_${key}`);
+  assert.ok(used.has("copied") && used.has("optShortcut"), "string lists were found");
   for (const k of used) assert.ok(ro[k], `missing message ${k}`);
+});
+
+test("strings the view fills in keep their $1", () => {
+  for (const lang of I18n.LANGS) {
+    const m = messages(lang);
+    for (const k of ["copied", "updatedAgo"]) assert.match(m[k].message, /\$1/, `${lang} ${k}`);
+  }
+});
+
+test("the shortcut description is localised in the manifest", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.json"), "utf8"));
+  const key = /^__MSG_(\w+)__$/.exec(manifest.commands["convert-selection"].description)[1];
+  for (const lang of I18n.LANGS) assert.ok(messages(lang)[key], `${lang} ${key}`);
 });
 
 test("language resolution", () => {

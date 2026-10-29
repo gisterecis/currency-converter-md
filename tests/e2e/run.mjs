@@ -93,7 +93,7 @@ async function shot(context, name) {
 
 // Firefox 15x no longer lets WebDriver navigate a tab to moz-extension://,
 // so open it from the browser window (needs MOZ_REMOTE_ALLOW_SYSTEM_ACCESS).
-async function openExtensionPage(url) {
+async function openExtensionPage(url, { closeOthers = false } = {}) {
   const { contexts: before } = await cmd("browsingContext.getTree", { maxDepth: 0 });
   const { contexts: windows } = await cmd("browsingContext.getTree", { maxDepth: 0, "moz:scope": "chrome" });
   await evaluate(
@@ -106,7 +106,7 @@ async function openExtensionPage(url) {
     const { contexts } = await cmd("browsingContext.getTree", { maxDepth: 0 });
     const page = contexts.find((c) => c.url === url && !before.some((b) => b.context === c.context));
     if (page) {
-      for (const b of before) await cmd("browsingContext.close", { context: b.context }).catch(() => {});
+      if (closeOthers) for (const b of before) await cmd("browsingContext.close", { context: b.context }).catch(() => {});
       return page.context;
     }
     await new Promise((r) => setTimeout(r, 200));
@@ -123,7 +123,7 @@ const check = (cond, label, detail) => {
 try {
   await cmd("session.new", { capabilities: {} });
   await cmd("webExtension.install", { extensionData: { type: "path", path: ROOT } });
-  const harness = await openExtensionPage(`${EXT}/tests/e2e/harness.html`);
+  const harness = await openExtensionPage(`${EXT}/tests/e2e/harness.html`, { closeOthers: true });
 
   const bgEval = (code) =>
     evaluate(harness, `const bg = await browser.runtime.getBackgroundPage(); ${code}`);
@@ -247,6 +247,22 @@ try {
     await shot(page, file);
   }
 
+  // 6b. Keyboard shortcut: converts the selection without the menu.
+  await setSettings({ bank: "maib", lang: "ro" });
+  await evaluate(
+    page,
+    `const span = [...document.querySelectorAll("span")].find((s) => s.textContent === "1.234,56 €");
+     const range = document.createRange(); range.selectNodeContents(span);
+     const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);`
+  );
+  await evaluate(page, `document.querySelector("cv-converter-box")?.remove(); return true;`);
+  const viaShortcut = await bgEval(
+    `const tab = (await browser.tabs.query({})).find((t) => t.url && t.url.startsWith(${JSON.stringify(PAGE)}));
+     await bg.convertSelectionInTab(tab); return true;`
+  );
+  const shortcutBox = await evaluate(page, `return !!document.querySelector("cv-converter-box");`);
+  check(viaShortcut && shortcutBox, "shortcut opens the box for the selection");
+
   // 7. Esc closes the box.
   await cmd("input.performActions", {
     context: page,
@@ -254,6 +270,19 @@ try {
   });
   const closed = await evaluate(page, `return !document.querySelector("cv-converter-box");`);
   check(closed, "Esc closes the box");
+
+  // 7b. Toolbar popup (opened as a page).
+  await bgEval(`await browser.storage.local.remove("popup:last"); return true;`);
+  const popup = await openExtensionPage(`${EXT}/popup/popup.html`);
+  let popupText = null;
+  for (let i = 0; i < 50 && !popupText; i++) {
+    popupText = await evaluate(popup, `const c = document.getElementById("app").shadowRoot && document.getElementById("app").shadowRoot.querySelector(".card");
+      return c && !c.classList.contains("busy") && c.querySelector(".tile:not(.sk)") ? c.textContent : null;`);
+    if (!popupText) await new Promise((r) => setTimeout(r, 200));
+  }
+  check(popupText && popupText.includes("Numerar la sucursale") && popupText.includes("1 EUR ="), "toolbar popup converts 100 EUR", popupText && popupText.slice(0, 80));
+  // Firefox can't resize or screenshot extension pages over WebDriver; the Chrome run covers those.
+  await cmd("browsingContext.close", { context: popup }).catch(() => {});
 
   // 8. Privileged pages can't host the box: result goes to a notification.
   await cmd("browsingContext.navigate", { context: page, url: "about:robots", wait: "complete" });

@@ -41,15 +41,25 @@ tables, and closes the tab.
 - **Chrome** can't change the menu per selection, so it always shows **Convertește „…” în ▸** and the target
   currencies. The box detects the source currency. When it can't, it guesses (MDL, or EUR when converting to MDL)
   and asks you to pick it.
-- **In the box:**
-  - The pickers change the bank, the source and the target currency. A bank picked here becomes your default.
-  - ⇄ swaps the two currencies, ⚙ opens settings, ⟳ refreshes the rates.
-  - Esc, a click outside or × closes it.
+- **The result box:**
+  - Large tiles show what you get selling and pay buying, for each rate type. Each tile includes the effective
+    rate ("1 EUR = 19,90 MDL"), and a **best** tag marks the better option.
+  - Click a tile to copy the number. You can edit the amount right in the box.
+  - The pickers change the bank, the source and the target currency; a bank picked here becomes your default. ⇄
+    swaps the currencies, ⚙ opens settings, ⟳ refreshes the rates.
+  - Drag the box by its header. Esc, a click outside or × closes it.
+  - The bank's published buy/sell rates are folded under "Cursul publicat".
+- **Toolbar button:** opens the same converter without selecting anything. It remembers the last amount and
+  currencies.
+- **Keyboard shortcut** <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd>: converts the selection without the menu. Lei
+  go to the foreign currency you used last; anything else goes to lei. With nothing selected, it opens the toolbar
+  converter. You can change the shortcut from the settings page.
 - **Settings** (⚙, the menu's last item, or the browser's extension settings):
   - The bank.
   - The language: Automatic follows the browser and falls back to Romanian; or pick Română, English or Русский.
 - **Number formats** it understands: `1.234,56`, `1,234.56`, `1 234,56` (including non-breaking and narrow spaces),
-  `1'234.50`, and a leading `-`. For ambiguous separators (`1,234` or `1.500`) the box shows both readings.
+  `1'234.50`, and a leading `-`. For ambiguous separators (`1,234` or `1.500`) the box offers both readings to
+  pick from.
 - **Pages where extensions can't draw** (PDF viewer, `about:`/`chrome://` pages, the add-on stores): the result
   appears as a system notification instead.
 
@@ -99,7 +109,9 @@ The repo root is the Firefox add-on. `scripts/build.mjs` builds the Chrome versi
 | `lib/i18n.js`, `_locales/` | ro/en/ru strings and language choice |
 | `lib/ext.js` | Firefox/Chrome API differences |
 | `background.js` | menus, settings, results to the box or a notification |
-| `content/box.js` | the floating result box (Shadow DOM), injected only when you convert |
+| `lib/view.js` | the converter UI shared by the box and the toolbar popup |
+| `content/box.js` | places the box next to the selection (Shadow DOM), injected only when you convert |
+| `popup/` | toolbar converter |
 | `options/` | settings page |
 | `store/` | Chrome Web Store listing text, privacy policy, promo tile, screenshots, submission notes |
 
