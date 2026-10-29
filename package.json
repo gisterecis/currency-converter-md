@@ -1,6 +1,6 @@
 {
   "name": "convertor-valutar-md",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "private": true,
   "description": "Browser extension for Firefox and Chrome: convert selected amounts at Moldovan banks' exchange rates",
   "scripts": {
