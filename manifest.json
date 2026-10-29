@@ -1,16 +1,44 @@
 {
   "manifest_version": 3,
-  "name": "Currency Converter (maib rates)",
-  "version": "1.0.0",
-  "description": "Select an amount, right-click and convert it at maib.md exchange rates (cash at branches and card operations).",
+  "name": "__MSG_extName__",
+  "version": "2.0.0",
+  "description": "__MSG_extDescription__",
+  "default_locale": "ro",
   "icons": {
-    "48": "icons/icon.svg",
-    "96": "icons/icon.svg"
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
   },
   "permissions": ["menus", "storage", "scripting", "notifications"],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "scripts": ["lib/parse.js", "lib/convert.js", "lib/rates.js", "background.js"]
+    "scripts": [
+      "lib/ext.js",
+      "lib/i18n.js",
+      "lib/scrape.js",
+      "lib/parse.js",
+      "lib/convert.js",
+      "lib/banks/registry.js",
+      "lib/banks/maib.js",
+      "lib/banks/micb.js",
+      "lib/banks/victoriabank.js",
+      "lib/banks/otp.js",
+      "lib/banks/procredit.js",
+      "lib/banks/fincombank.js",
+      "lib/banks/eximbank.js",
+      "lib/banks/energbank.js",
+      "lib/banks/comertbank.js",
+      "lib/banks/ecb.js",
+      "lib/banks/bnm.js",
+      "lib/rates.js",
+      "background.js"
+    ]
+  },
+  "options_ui": {
+    "page": "options/options.html",
+    "open_in_tab": false
   },
   "browser_specific_settings": {
     "gecko": {

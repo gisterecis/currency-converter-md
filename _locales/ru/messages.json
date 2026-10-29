@@ -1,0 +1,179 @@
+{
+  "extName": {
+    "message": "Конвертер валют MD"
+  },
+  "extDescription": {
+    "message": "Выделите сумму, нажмите правой кнопкой и конвертируйте по курсу вашего банка: maib, MICB, Victoriabank, OTP, НБМ и др."
+  },
+  "appName": {
+    "message": "Конвертер валют"
+  },
+  "menuConvertTo": {
+    "message": "Конвертировать $1 в"
+  },
+  "menuConvertFrom": {
+    "message": "Конвертировать $1 из"
+  },
+  "menuTreatAs": {
+    "message": "Другая исходная валюта"
+  },
+  "menuConvertSelection": {
+    "message": "Конвертировать «%s» в"
+  },
+  "menuSettings": {
+    "message": "Настройки (курс $1)…"
+  },
+  "cat_cash": {
+    "message": "Наличные в отделениях"
+  },
+  "cat_card": {
+    "message": "Операции по карте"
+  },
+  "cat_online": {
+    "message": "Онлайн / приложение"
+  },
+  "cat_official": {
+    "message": "Официальный курс НБМ"
+  },
+  "short_cash": {
+    "message": "Наличные"
+  },
+  "short_card": {
+    "message": "Карта"
+  },
+  "short_online": {
+    "message": "Онлайн"
+  },
+  "short_official": {
+    "message": "НБМ"
+  },
+  "sellYouGet": {
+    "message": "Продаёте $1, получаете"
+  },
+  "buyYouPay": {
+    "message": "Покупаете $1, платите"
+  },
+  "officialRow": {
+    "message": "По официальному курсу"
+  },
+  "noRate": {
+    "message": "Нет курса для $1"
+  },
+  "ambiguousNote": {
+    "message": "Разделитель неоднозначен, поэтому показаны оба варианта."
+  },
+  "ifReading": {
+    "message": "Если это $1:"
+  },
+  "srcGuessed": {
+    "message": "Валюта суммы не распознана. Выберите её выше."
+  },
+  "ratesFor": {
+    "message": "Курс $1 на $2"
+  },
+  "ratesOf": {
+    "message": "Курс $1"
+  },
+  "updatedAt": {
+    "message": "обновлено в $1"
+  },
+  "feeNote": {
+    "message": "* включая сбор 0,1% при покупке наличной валюты"
+  },
+  "staleNote": {
+    "message": "Не удалось связаться с $1, поэтому показан последний сохранённый курс."
+  },
+  "openBankPage": {
+    "message": "Страница курсов $1 ↗"
+  },
+  "errLoad": {
+    "message": "Не удалось загрузить курс: $1"
+  },
+  "errNoNumber": {
+    "message": "В выделенном тексте нет числа"
+  },
+  "errLayout": {
+    "message": "страница $1 изменилась"
+  },
+  "errBlocked": {
+    "message": "$1 заблокировал запрос (проверка на бота)"
+  },
+  "errBusy": {
+    "message": "$1 ограничивает запросы, попробуйте через несколько минут"
+  },
+  "errTimeout": {
+    "message": "страница $1 не загрузилась вовремя"
+  },
+  "errHttp": {
+    "message": "$1 ответил ошибкой $2"
+  },
+  "errNetwork": {
+    "message": "нет соединения с $1"
+  },
+  "errGeneric": {
+    "message": "$1"
+  },
+  "boxLabel": {
+    "message": "Конвертация валют"
+  },
+  "close": {
+    "message": "Закрыть (Esc)"
+  },
+  "refresh": {
+    "message": "Обновить курс"
+  },
+  "settings": {
+    "message": "Настройки"
+  },
+  "loading": {
+    "message": "Загружаем курс $1…"
+  },
+  "bankLabel": {
+    "message": "Банк"
+  },
+  "fromLabel": {
+    "message": "Из"
+  },
+  "toLabel": {
+    "message": "В"
+  },
+  "swap": {
+    "message": "Поменять валюты местами"
+  },
+  "noteFincombank": {
+    "message": "Наличные: филиал № 3, бд. Дачия 20. В других филиалах курс может отличаться."
+  },
+  "noteVictoriabank": {
+    "message": "Наличные: курс филиала № 3. В других филиалах может отличаться."
+  },
+  "noteEnergbank": {
+    "message": "Курс центрального офиса. В других филиалах может отличаться."
+  },
+  "bankBnm": {
+    "message": "НБМ (официальный курс)"
+  },
+  "optionsTitle": {
+    "message": "Настройки · Конвертер валют MD"
+  },
+  "optIntro": {
+    "message": "Выделите сумму на любой странице, нажмите правой кнопкой и выберите «Конвертировать…»."
+  },
+  "optBank": {
+    "message": "Банк, курс которого вы используете"
+  },
+  "optLang": {
+    "message": "Язык"
+  },
+  "optLangAuto": {
+    "message": "Автоматически (язык браузера)"
+  },
+  "optSaved": {
+    "message": "Сохранено"
+  },
+  "optDisclaimer": {
+    "message": "Курсы берутся с сайтов банков и носят информационный характер; при операции действует курс банка на тот момент. Расширение не связано ни с одним банком."
+  },
+  "optPrivacy": {
+    "message": "Расширение не собирает данные: выделенный текст обрабатывается только в вашем браузере."
+  }
+}

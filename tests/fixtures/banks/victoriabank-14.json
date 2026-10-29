@@ -1,0 +1,430 @@
+{
+ "rates": [
+  {
+   "currencyMarket": "Cursul valutar online",
+   "fromDate": "2026-10-28T00:00:00",
+   "currencies": [
+    {
+     "currency": "CHF",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 21.55,
+       "sellRate": 22.15,
+       "bnmRate": 21.8426,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "EUR",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 19.92,
+       "sellRate": 20.28,
+       "bnmRate": 20.176,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "GBP",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 23.8,
+       "sellRate": 24.3,
+       "bnmRate": 24.1152,
+       "rateMovement": "Up"
+      }
+     ]
+    },
+    {
+     "currency": "RON",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 3.72,
+       "sellRate": 3.83,
+       "bnmRate": 3.772,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "USD",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 17.84,
+       "sellRate": 18.25,
+       "bnmRate": 18.1032,
+       "rateMovement": "Up"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "currencyMarket": "Cursul valutar online",
+   "fromDate": "2026-10-28T09:20:00",
+   "currencies": [
+    {
+     "currency": "CHF",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 21.53,
+       "sellRate": 22.15,
+       "bnmRate": 21.8426,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "EUR",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 19.94,
+       "sellRate": 20.24,
+       "bnmRate": 20.176,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "GBP",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 23.8,
+       "sellRate": 24.35,
+       "bnmRate": 24.1152,
+       "rateMovement": "Up"
+      }
+     ]
+    },
+    {
+     "currency": "RON",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 3.71,
+       "sellRate": 3.83,
+       "bnmRate": 3.772,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "USD",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 17.85,
+       "sellRate": 18.25,
+       "bnmRate": 18.1032,
+       "rateMovement": "Up"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "currencyMarket": "Cursul valutar online",
+   "fromDate": "2026-10-28T16:10:00",
+   "currencies": [
+    {
+     "currency": "CHF",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 21.53,
+       "sellRate": 22.15,
+       "bnmRate": 21.8426,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "EUR",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 19.9,
+       "sellRate": 20.25,
+       "bnmRate": 20.176,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "GBP",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 23.8,
+       "sellRate": 24.35,
+       "bnmRate": 24.1152,
+       "rateMovement": "Up"
+      }
+     ]
+    },
+    {
+     "currency": "RON",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 3.72,
+       "sellRate": 3.83,
+       "bnmRate": 3.772,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "USD",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 17.85,
+       "sellRate": 18.18,
+       "bnmRate": 18.1032,
+       "rateMovement": "Up"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "currencyMarket": "Cursul valutar online",
+   "fromDate": "2026-10-29T00:00:00",
+   "currencies": [
+    {
+     "currency": "CHF",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 21.53,
+       "sellRate": 22.15,
+       "bnmRate": 21.8009,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "EUR",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 19.9,
+       "sellRate": 20.25,
+       "bnmRate": 20.1303,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "GBP",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 23.8,
+       "sellRate": 24.35,
+       "bnmRate": 24.0347,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "RON",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 3.72,
+       "sellRate": 3.83,
+       "bnmRate": 3.7624,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "USD",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 17.85,
+       "sellRate": 18.18,
+       "bnmRate": 18.0881,
+       "rateMovement": "Down"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "currencyMarket": "Cursul valutar online",
+   "fromDate": "2026-10-29T09:17:00",
+   "currencies": [
+    {
+     "currency": "CHF",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 21.53,
+       "sellRate": 22.1,
+       "bnmRate": 21.8009,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "EUR",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 19.97,
+       "sellRate": 20.25,
+       "bnmRate": 20.1303,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "GBP",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 23.8,
+       "sellRate": 24.35,
+       "bnmRate": 24.0347,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "RON",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 3.71,
+       "sellRate": 3.83,
+       "bnmRate": 3.7624,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "USD",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 17.85,
+       "sellRate": 18.23,
+       "bnmRate": 18.0881,
+       "rateMovement": "Down"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "currencyMarket": "Cursul valutar online",
+   "fromDate": "2026-10-29T16:10:00",
+   "currencies": [
+    {
+     "currency": "CHF",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 21.53,
+       "sellRate": 22.1,
+       "bnmRate": 21.8009,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "EUR",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 20.0,
+       "sellRate": 20.29,
+       "bnmRate": 20.1303,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "GBP",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 23.8,
+       "sellRate": 24.35,
+       "bnmRate": 24.0347,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "RON",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 3.72,
+       "sellRate": 3.83,
+       "bnmRate": 3.7624,
+       "rateMovement": "Down"
+      }
+     ]
+    },
+    {
+     "currency": "USD",
+     "currencyRates": [
+      {
+       "baseCurrency": "MDL",
+       "nominal": 1,
+       "buyRate": 17.9,
+       "sellRate": 18.25,
+       "bnmRate": 18.0881,
+       "rateMovement": "Down"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -33,6 +33,20 @@ const cases = [
   ["12345,678", [12345.678], null],
   ["costs 45 euro", [45], "EUR"],
   ["item-5 lei", [5], "MDL"],
+  // Romanian and Russian words.
+  ["100 dolari", [100], "USD"],
+  ["50 de lire sterline", [50], "GBP"],
+  ["200 franci elvețieni", [200], "CHF"],
+  ["300 ruble", [300], "RUB"],
+  ["1 000 grivne", [1000], "UAH"],
+  ["5 фунтов стерлингов", [5], "GBP"],
+  ["20 франков", [20], "CHF"],
+  // Other ISO codes and symbols (BNM quotes 40 currencies).
+  ["100 PLN", [100], "PLN"],
+  ["99,90 zł", [99.9], "PLN"],
+  ["₺ 250", [250], "TRY"],
+  ["1 500 TRY", [1500], "TRY"],
+  ["JPY 12 000", [12000], "JPY"],
 ];
 
 for (const [input, candidates, currency] of cases) {
@@ -54,6 +68,11 @@ test("keeps the selected number text for the menu", () => {
 
 test("does not match 'lei' inside another word", () => {
   assert.equal(parseSelection("bleile 100").currency, null);
+});
+
+test("lower-case words that look like codes are not currencies", () => {
+  assert.equal(parseSelection("try 100").currency, null);
+  assert.equal(parseSelection("all 25").currency, null);
 });
 
 test("returns null for non-numbers and long selections", () => {
