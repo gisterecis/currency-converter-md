@@ -1,0 +1,179 @@
+{
+  "extName": {
+    "message": "Convertor valutar MD"
+  },
+  "extDescription": {
+    "message": "Selectează o sumă, click dreapta și convertește la cursul băncii tale: maib, MICB, Victoriabank, OTP, BNM și altele."
+  },
+  "appName": {
+    "message": "Convertor valutar"
+  },
+  "menuConvertTo": {
+    "message": "Convertește $1 în"
+  },
+  "menuConvertFrom": {
+    "message": "Convertește $1 din"
+  },
+  "menuTreatAs": {
+    "message": "Altă valută sursă"
+  },
+  "menuConvertSelection": {
+    "message": "Convertește „%s” în"
+  },
+  "menuSettings": {
+    "message": "Setări (cursul $1)…"
+  },
+  "cat_cash": {
+    "message": "Numerar la sucursale"
+  },
+  "cat_card": {
+    "message": "Operațiuni cu cardul"
+  },
+  "cat_online": {
+    "message": "Online / aplicație"
+  },
+  "cat_official": {
+    "message": "Cursul oficial BNM"
+  },
+  "short_cash": {
+    "message": "Numerar"
+  },
+  "short_card": {
+    "message": "Card"
+  },
+  "short_online": {
+    "message": "Online"
+  },
+  "short_official": {
+    "message": "BNM"
+  },
+  "sellYouGet": {
+    "message": "Vinzi $1, primești"
+  },
+  "buyYouPay": {
+    "message": "Cumperi $1, plătești"
+  },
+  "officialRow": {
+    "message": "La cursul oficial"
+  },
+  "noRate": {
+    "message": "Nu există curs pentru $1"
+  },
+  "ambiguousNote": {
+    "message": "Separatorul e ambiguu, așa că sunt afișate ambele variante."
+  },
+  "ifReading": {
+    "message": "Dacă e $1:"
+  },
+  "srcGuessed": {
+    "message": "Valuta sumei nu a fost recunoscută. Alege-o mai sus."
+  },
+  "ratesFor": {
+    "message": "Cursul $1 din $2"
+  },
+  "ratesOf": {
+    "message": "Cursul $1"
+  },
+  "updatedAt": {
+    "message": "actualizat la $1"
+  },
+  "feeNote": {
+    "message": "* include taxa de 0,1% la cumpărarea valutei în numerar"
+  },
+  "staleNote": {
+    "message": "Nu am putut accesa $1, așa că afișăm ultimul curs salvat."
+  },
+  "openBankPage": {
+    "message": "Pagina de curs $1 ↗"
+  },
+  "errLoad": {
+    "message": "Nu am putut încărca cursul: $1"
+  },
+  "errNoNumber": {
+    "message": "Selecția nu conține niciun număr"
+  },
+  "errLayout": {
+    "message": "pagina $1 s-a schimbat"
+  },
+  "errBlocked": {
+    "message": "$1 a blocat cererea (verificare anti-bot)"
+  },
+  "errBusy": {
+    "message": "$1 limitează cererile, încearcă peste câteva minute"
+  },
+  "errTimeout": {
+    "message": "pagina $1 nu s-a încărcat la timp"
+  },
+  "errHttp": {
+    "message": "$1 a răspuns cu eroarea $2"
+  },
+  "errNetwork": {
+    "message": "nu există conexiune cu $1"
+  },
+  "errGeneric": {
+    "message": "$1"
+  },
+  "boxLabel": {
+    "message": "Conversie valutară"
+  },
+  "close": {
+    "message": "Închide (Esc)"
+  },
+  "refresh": {
+    "message": "Reîncarcă cursul"
+  },
+  "settings": {
+    "message": "Setări"
+  },
+  "loading": {
+    "message": "Se încarcă cursul $1…"
+  },
+  "bankLabel": {
+    "message": "Banca"
+  },
+  "fromLabel": {
+    "message": "Din"
+  },
+  "toLabel": {
+    "message": "În"
+  },
+  "swap": {
+    "message": "Inversează valutele"
+  },
+  "noteFincombank": {
+    "message": "Numerar: sucursala nr. 3, bd. Dacia 20. La alte sucursale cursul poate diferi."
+  },
+  "noteVictoriabank": {
+    "message": "Numerar: cursul sucursalei nr. 3. La alte sucursale poate diferi."
+  },
+  "noteEnergbank": {
+    "message": "Cursul Oficiului Central. La alte sucursale poate diferi."
+  },
+  "bankBnm": {
+    "message": "BNM (curs oficial)"
+  },
+  "optionsTitle": {
+    "message": "Setări · Convertor valutar MD"
+  },
+  "optIntro": {
+    "message": "Selectează o sumă pe orice pagină, dă click dreapta și alege „Convertește…”."
+  },
+  "optBank": {
+    "message": "Banca ale cărei cursuri le folosești"
+  },
+  "optLang": {
+    "message": "Limba"
+  },
+  "optLangAuto": {
+    "message": "Automat (limba browserului)"
+  },
+  "optSaved": {
+    "message": "Salvat"
+  },
+  "optDisclaimer": {
+    "message": "Cursurile sunt preluate de pe site-urile băncilor și au caracter informativ. La tranzacție se aplică cursul băncii din acel moment. Extensia nu este afiliată cu nicio bancă."
+  },
+  "optPrivacy": {
+    "message": "Extensia nu colectează date: textul selectat este procesat doar în browserul tău."
+  }
+}

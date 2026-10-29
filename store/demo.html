@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Magazin demo</title>
+  <!-- Page used only for the store screenshots (tests/e2e/chrome.mjs --store). -->
+  <style>
+    :root { --ink: #1d2330; --muted: #667085; --line: #e4e7ec; --tint: #f3f6f8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); background: #fff; }
+    header { display: flex; align-items: center; gap: 12px; padding: 18px 48px; border-bottom: 1px solid var(--line); }
+    .logo { width: 32px; height: 32px; border-radius: 8px; background: #344054; }
+    header strong { font-size: 18px; }
+    header nav { margin-left: auto; display: flex; gap: 24px; color: var(--muted); font-size: 15px; }
+    main { padding: 32px 48px; }
+    h1 { font-size: 26px; margin: 0 0 6px; }
+    .sub { color: var(--muted); margin: 0 0 28px; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .item { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+    .pic { height: 170px; background: var(--tint); display: grid; place-items: center; }
+    .pic svg { width: 84px; height: 84px; opacity: .55; }
+    .info { padding: 14px 16px 18px; }
+    .name { font-weight: 600; }
+    .meta { color: var(--muted); font-size: 14px; margin: 2px 0 10px; }
+    .price { font-size: 22px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"></div><strong>Magazin demo</strong>
+    <nav><span>Electronice</span><span>Casă</span><span>Călătorii</span></nav>
+  </header>
+  <main>
+    <h1>Oferte din străinătate</h1>
+    <p class="sub">Prețuri afișate în valuta vânzătorului.</p>
+    <div class="grid">
+      <div class="item">
+        <div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="1.5"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M2 19h20"/></svg></div>
+        <div class="info"><div class="name">Laptop 14″, 16 GB</div><div class="meta">Livrare din Germania</div><div class="price"><b>1.299,00 €</b></div></div>
+      </div>
+      <div class="item">
+        <div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="1.5"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
+        <div class="info"><div class="name">Telefon 256 GB</div><div class="meta">Livrare din SUA</div><div class="price"><b>$849.99</b></div></div>
+      </div>
+      <div class="item">
+        <div class="pic"><svg viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="1.5"><path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/></svg></div>
+        <div class="info"><div class="name">Chirie apartament, lunar</div><div class="meta">Chișinău, Centru</div><div class="price"><b>24 990 lei</b></div></div>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

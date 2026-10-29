@@ -1,0 +1,179 @@
+{
+  "extName": {
+    "message": "Currency Converter MD"
+  },
+  "extDescription": {
+    "message": "Select an amount, right-click and convert it at your Moldovan bank's rates: maib, MICB, Victoriabank, OTP, BNM and more."
+  },
+  "appName": {
+    "message": "Currency converter"
+  },
+  "menuConvertTo": {
+    "message": "Convert $1 to"
+  },
+  "menuConvertFrom": {
+    "message": "Convert $1 from"
+  },
+  "menuTreatAs": {
+    "message": "Treat as another currency"
+  },
+  "menuConvertSelection": {
+    "message": "Convert “%s” to"
+  },
+  "menuSettings": {
+    "message": "Settings ($1 rates)…"
+  },
+  "cat_cash": {
+    "message": "Cash at branches"
+  },
+  "cat_card": {
+    "message": "Card operations"
+  },
+  "cat_online": {
+    "message": "Online / mobile app"
+  },
+  "cat_official": {
+    "message": "BNM official rate"
+  },
+  "short_cash": {
+    "message": "Cash"
+  },
+  "short_card": {
+    "message": "Card"
+  },
+  "short_online": {
+    "message": "Online"
+  },
+  "short_official": {
+    "message": "BNM"
+  },
+  "sellYouGet": {
+    "message": "Sell $1, you get"
+  },
+  "buyYouPay": {
+    "message": "Buy $1, you pay"
+  },
+  "officialRow": {
+    "message": "At the official rate"
+  },
+  "noRate": {
+    "message": "No $1 rate"
+  },
+  "ambiguousNote": {
+    "message": "Ambiguous separator, so both readings are shown."
+  },
+  "ifReading": {
+    "message": "If $1:"
+  },
+  "srcGuessed": {
+    "message": "The amount's currency wasn't recognised. Pick it above."
+  },
+  "ratesFor": {
+    "message": "$1 rates for $2"
+  },
+  "ratesOf": {
+    "message": "$1 rates"
+  },
+  "updatedAt": {
+    "message": "updated $1"
+  },
+  "feeNote": {
+    "message": "* includes the 0.1% fee on buying foreign cash"
+  },
+  "staleNote": {
+    "message": "Couldn't reach $1, so these are the last saved rates."
+  },
+  "openBankPage": {
+    "message": "$1 rates page ↗"
+  },
+  "errLoad": {
+    "message": "Couldn't load the rates: $1"
+  },
+  "errNoNumber": {
+    "message": "No number found in the selection"
+  },
+  "errLayout": {
+    "message": "the $1 page layout changed"
+  },
+  "errBlocked": {
+    "message": "$1 blocked the request (bot check)"
+  },
+  "errBusy": {
+    "message": "$1 is limiting requests, try again in a few minutes"
+  },
+  "errTimeout": {
+    "message": "the $1 page did not load in time"
+  },
+  "errHttp": {
+    "message": "$1 answered with error $2"
+  },
+  "errNetwork": {
+    "message": "can't connect to $1"
+  },
+  "errGeneric": {
+    "message": "$1"
+  },
+  "boxLabel": {
+    "message": "Currency conversion"
+  },
+  "close": {
+    "message": "Close (Esc)"
+  },
+  "refresh": {
+    "message": "Refresh rates"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "loading": {
+    "message": "Fetching $1 rates…"
+  },
+  "bankLabel": {
+    "message": "Bank"
+  },
+  "fromLabel": {
+    "message": "From"
+  },
+  "toLabel": {
+    "message": "To"
+  },
+  "swap": {
+    "message": "Swap currencies"
+  },
+  "noteFincombank": {
+    "message": "Cash: branch no. 3, bd. Dacia 20. Other branches may differ."
+  },
+  "noteVictoriabank": {
+    "message": "Cash: branch no. 3 rate. Other branches may differ."
+  },
+  "noteEnergbank": {
+    "message": "Central Office rates. Other branches may differ."
+  },
+  "bankBnm": {
+    "message": "BNM (official rate)"
+  },
+  "optionsTitle": {
+    "message": "Settings · Currency Converter MD"
+  },
+  "optIntro": {
+    "message": "Select an amount on any page, right-click and choose “Convert…”."
+  },
+  "optBank": {
+    "message": "Bank whose rates you use"
+  },
+  "optLang": {
+    "message": "Language"
+  },
+  "optLangAuto": {
+    "message": "Automatic (browser language)"
+  },
+  "optSaved": {
+    "message": "Saved"
+  },
+  "optDisclaimer": {
+    "message": "Rates are read from the banks' websites and are for information only; the bank's rate at the time of the transaction applies. This extension is not affiliated with any bank."
+  },
+  "optPrivacy": {
+    "message": "The extension collects no data: the selected text is processed only in your browser."
+  }
+}

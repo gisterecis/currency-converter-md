@@ -1,10 +1,11 @@
-// Floating result box, injected on demand when a conversion is picked.
+// Floating result box, injected on demand when a conversion is picked. All
+// text comes from the background script, already localised.
 (() => {
   "use strict";
-  if (window.__maibConverterBox) return;
-  window.__maibConverterBox = true;
+  if (window.__cvConverterBox) return;
+  window.__cvConverterBox = true;
 
-  const RATES_URL = "https://www.maib.md/ro/curs-valutar";
+  const api = globalThis.browser || globalThis.chrome;
   const GAP = 6;
   const MARGIN = 8;
 
@@ -12,9 +13,9 @@
     :host { all: initial; }
     * { box-sizing: border-box; }
     .card {
-      --bg: #ffffff; --fg: #1d2330; --muted: #667085; --line: #e4e7ec;
+      --bg: #ffffff; --fg: #1d2330; --muted: #667085; --line: #e4e7ec; --field: #f7f8fa;
       --accent: #0b7a75; --accent-soft: #e6f4f3; --warn: #9a5b00; --warn-bg: #fff4e0;
-      width: 340px; max-width: calc(100vw - ${2 * MARGIN}px);
+      width: 360px; max-width: calc(100vw - ${2 * MARGIN}px);
       background: var(--bg); color: var(--fg);
       border: 1px solid var(--line); border-radius: 10px;
       box-shadow: 0 10px 30px rgba(16, 24, 40, .18), 0 2px 6px rgba(16, 24, 40, .08);
@@ -23,13 +24,13 @@
     }
     @media (prefers-color-scheme: dark) {
       .card {
-        --bg: #1f232b; --fg: #e8eaef; --muted: #9aa3b2; --line: #343a46;
+        --bg: #1f232b; --fg: #e8eaef; --muted: #9aa3b2; --line: #343a46; --field: #262b34;
         --accent: #4fc3bb; --accent-soft: #1d3a39; --warn: #f5c16c; --warn-bg: #3a2f1c;
         box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
       }
     }
     header {
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 4px;
       padding: 8px 8px 8px 12px; background: var(--accent-soft); border-bottom: 1px solid var(--line);
     }
     .title { flex: 1; font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
@@ -38,14 +39,24 @@
       display: grid; place-items: center; color: var(--muted); font-size: 16px; line-height: 1;
     }
     button:hover { background: var(--line); color: var(--fg); }
-    button:focus-visible { outline: 2px solid var(--accent); }
+    button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
     button[disabled] { opacity: .4; cursor: default; }
+    .controls {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 6px; align-items: center;
+      padding: 10px 12px 2px;
+    }
+    .controls .bank { grid-column: 1 / -1; }
+    select {
+      font: inherit; color: var(--fg); background: var(--field); width: 100%;
+      border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; min-width: 0;
+    }
+    select[disabled] { opacity: .6; }
     .body { padding: 6px 12px 10px; }
     .muted { color: var(--muted); }
     .loading { padding: 8px 0; color: var(--muted); }
-    .error { padding: 8px 10px; margin-top: 6px; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
+    .error, .hint { padding: 8px 10px; margin-top: 6px; border-radius: 6px; background: var(--warn-bg); color: var(--warn); }
     .note { margin: 6px 0 2px; color: var(--muted); font-size: 12px; }
-    .section { margin-top: 6px; }
+    .section { margin-top: 8px; }
     .section-label {
       font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent);
     }
@@ -71,14 +82,17 @@
   let root = null;
   let anchor = null;
   let request = null;
-  let currentTitle = "maib";
+  let strings = {};
+  let lastModel = null;
 
   function h(tag, attrs, ...children) {
     const el = document.createElement(tag);
     for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
       if (k === "class") el.className = v;
       else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
-      else el.setAttribute(k, v);
+      else if (k === "selected") el.selected = true;
+      else el.setAttribute(k, v === true ? "" : v);
     }
     for (const c of children.flat(Infinity)) {
       if (c == null || c === false) continue;
@@ -95,11 +109,13 @@
     }
     // Selections inside <input>/<textarea> have no range rect; use the element.
     try {
-      const el = targetElementId != null && browser.menus.getTargetElement(targetElementId);
+      const el = targetElementId != null && api.menus && api.menus.getTargetElement(targetElementId);
       if (el) return el.getBoundingClientRect();
     } catch (e) {
-      // Not available; fall through.
+      // Firefox only; fall through.
     }
+    const active = document.activeElement;
+    if (active && /^(INPUT|TEXTAREA)$/.test(active.tagName)) return active.getBoundingClientRect();
     return null;
   }
 
@@ -141,26 +157,59 @@
     document.removeEventListener("mousedown", onPointer, true);
   }
 
+  // Bank on its own row, then from ⇄ to. Disabled while loading.
+  function controls(model, busy) {
+    const banks = (model && model.banks) || [];
+    const currencies = (model && model.currencies) || [];
+    const option = (value, label, selected) => h("option", { value, selected }, label);
+    const pick = (key) => (e) => convert({ ...request, [key]: e.target.value });
+    if (!banks.length && !currencies.length) return null;
+    return h(
+      "div",
+      { class: "controls" },
+      h(
+        "select",
+        { class: "bank", "aria-label": strings.bankLabel, title: strings.bankLabel, disabled: busy, onchange: pick("bank") },
+        banks.map((b) => option(b.id, b.name, b.id === request.bank))
+      ),
+      h(
+        "select",
+        { "aria-label": strings.fromLabel, title: strings.fromLabel, disabled: busy || !currencies.length, onchange: pick("src") },
+        currencies.map((c) => option(c.code, `${c.code} · ${c.name}`, c.code === request.src))
+      ),
+      h(
+        "button",
+        {
+          title: strings.swap,
+          "aria-label": strings.swap,
+          disabled: busy || !request.src,
+          onclick: busy ? null : () => convert({ ...request, src: request.dst, dst: request.src }),
+        },
+        "⇄"
+      ),
+      h(
+        "select",
+        { "aria-label": strings.toLabel, title: strings.toLabel, disabled: busy || !currencies.length, onchange: pick("dst") },
+        currencies.map((c) => option(c.code, `${c.code} · ${c.name}`, c.code === request.dst))
+      )
+    );
+  }
+
   function frame(title, bodyChildren, footerChildren, { busy = false } = {}) {
-    currentTitle = title;
     root.replaceChildren(
       h("style", null, CSS),
       h(
         "div",
-        { class: "card", role: "dialog", "aria-label": "maib currency conversion" },
+        { class: "card", role: "dialog", "aria-label": strings.boxLabel },
         h(
           "header",
           null,
           h("span", { class: "title" }, title),
-          h(
-            "button",
-            busy
-              ? { title: "Refresh rates", "aria-label": "Refresh rates", disabled: "" }
-              : { title: "Refresh rates", "aria-label": "Refresh rates", onclick: refresh },
-            "⟳"
-          ),
-          h("button", { title: "Close (Esc)", "aria-label": "Close", onclick: close }, "×")
+          h("button", { title: strings.settings, "aria-label": strings.settings, onclick: openSettings }, "⚙"),
+          h("button", { title: strings.refresh, "aria-label": strings.refresh, disabled: busy, onclick: busy ? null : refresh }, "⟳"),
+          h("button", { title: strings.close, "aria-label": strings.close, onclick: close }, "×")
         ),
+        controls(lastModel, busy),
         h("div", { class: "body" }, bodyChildren),
         footerChildren && footerChildren.length ? h("footer", null, footerChildren) : null
       )
@@ -169,7 +218,7 @@
   }
 
   function renderLoading(title) {
-    frame(title, [h("div", { class: "loading" }, "Fetching maib rates…")], null, { busy: true });
+    frame(title, [h("div", { class: "loading" }, strings.loading)], null, { busy: true });
   }
 
   const withFee = (row) => row.value + (row.fee ? "*" : "");
@@ -182,10 +231,7 @@
         h("div", { class: "section-label" }, s.label),
         s.unavailable
           ? h("div", { class: "row muted" }, s.unavailable)
-          : [
-              h("div", { class: "row" }, h("span", null, s.get.label), h("span", { class: "value" }, withFee(s.get))),
-              h("div", { class: "row" }, h("span", null, s.pay.label), h("span", { class: "value" }, withFee(s.pay))),
-            ]
+          : s.rows.map((r) => h("div", { class: "row" }, h("span", null, r.label), h("span", { class: "value" }, withFee(r))))
       )
     );
   }
@@ -199,64 +245,69 @@
         cells.push(h("span", { class: "muted grid-full" }, s0.unavailable));
         return;
       }
-      for (const key of ["get", "pay"]) {
-        cells.push(h("span", null, s0[key].short));
-        for (const r of readings) cells.push(h("span", { class: "value" }, withFee(r.sections[i][key])));
-      }
+      s0.rows.forEach((row, j) => {
+        cells.push(h("span", null, row.short));
+        for (const r of readings) cells.push(h("span", { class: "value" }, withFee(r.sections[i].rows[j])));
+      });
     });
     return h("div", { class: "compare" }, cells);
   }
 
   function renderModel(model) {
+    lastModel = model;
+    if (model.request) request = model.request;
     const body = [];
-    if (model.error && !model.readings.length) {
-      body.push(h("div", { class: "error" }, `Couldn't load maib rates: ${model.error}`));
-    }
-    if (model.stale) {
-      body.push(h("div", { class: "error" }, "Couldn't reach maib.md, so these are the last saved rates."));
-    }
-    if (model.readings.length > 1) {
-      body.push(h("div", { class: "note" }, "Ambiguous separator, so both readings are shown."));
-      body.push(renderCompare(model.readings));
-    } else if (model.readings.length === 1) {
-      body.push(renderSingle(model.readings[0]));
+    if (model.error && !(model.readings || []).length) body.push(h("div", { class: "error" }, model.error));
+    if (model.stale) body.push(h("div", { class: "error" }, model.stale));
+    if (model.srcGuessed) body.push(h("div", { class: "hint" }, strings.srcGuessed));
+    const readings = model.readings || [];
+    if (readings.length > 1) {
+      body.push(h("div", { class: "note" }, strings.ambiguousNote));
+      body.push(renderCompare(readings));
+    } else if (readings.length === 1) {
+      body.push(renderSingle(readings[0]));
     }
 
-    const footer = [];
-    if (model.date) {
-      const updated = model.fetchedAt
-        ? ` · updated ${new Date(model.fetchedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`
-        : "";
-      footer.push(h("div", null, `maib rates for ${model.date}${updated}`));
-    }
-    for (const line of model.rateLines || []) footer.push(h("div", null, line));
-    if (model.anyFee) footer.push(h("div", null, "* includes the 0.1% fee on buying foreign cash"));
-    footer.push(h("div", null, h("a", { href: RATES_URL, target: "_blank", rel: "noopener noreferrer" }, "maib.md/ro/curs-valutar ↗")));
-
+    const footer = (model.footer || []).map((line) => h("div", null, line));
+    if (model.link) footer.push(h("div", null, h("a", { href: model.link.href, target: "_blank", rel: "noopener noreferrer" }, model.link.text)));
     frame(model.title, body, footer);
   }
 
-  async function refresh() {
-    if (!request) return;
-    const title = currentTitle;
+  async function send(msg, title) {
     renderLoading(title);
     try {
-      const model = await browser.runtime.sendMessage({ type: "maib-refresh", request });
-      if (host) renderModel(model);
+      const model = await api.runtime.sendMessage(msg);
+      if (!host) return;
+      if (!model || !model.title) throw new Error((model && model.error) || "no response");
+      renderModel(model);
     } catch (e) {
-      if (host) renderModel({ title, readings: [], rateLines: [], error: e.message });
+      if (host) renderModel({ ...(lastModel || {}), title, readings: [], footer: [], error: e.message });
     }
+  }
+
+  const refresh = () => send({ type: "cv-convert", request, force: true }, lastModel ? lastModel.title : "");
+
+  function convert(next) {
+    request = next;
+    send({ type: "cv-convert", request }, lastModel ? lastModel.title : "");
+  }
+
+  function openSettings() {
+    api.runtime.sendMessage({ type: "cv-options" }).catch(() => {});
   }
 
   function open(msg) {
     close();
     request = msg.request;
+    strings = msg.strings || {};
+    lastModel = null;
     const r = selectionRect(msg.targetElementId);
     anchor = r
       ? { top: r.top + window.scrollY, bottom: r.bottom + window.scrollY, left: r.left + window.scrollX }
       : null;
 
-    host = document.createElement("maib-converter-box");
+    host = document.createElement("cv-converter-box");
+    host.lang = msg.lang || "ro";
     host.style.cssText =
       "all: initial !important; display: block !important; position: absolute !important;" +
       " z-index: 2147483647 !important; top: 0; left: 0;";
@@ -268,17 +319,16 @@
     document.addEventListener("mousedown", onPointer, true);
   }
 
-  browser.runtime.onMessage.addListener((msg) => {
-    if (!msg || typeof msg.type !== "string") return undefined;
-    if (msg.type === "maib-open") {
+  // Replies go through sendResponse: Chrome ignores returned promises.
+  api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (!msg || typeof msg.type !== "string") return false;
+    if (msg.type === "cv-open") {
       open(msg);
-      return Promise.resolve(true);
+      sendResponse(true);
+    } else if (msg.type === "cv-result") {
+      if (host) renderModel(msg.model); // Closed while loading otherwise.
+      sendResponse(!!host);
     }
-    if (msg.type === "maib-result") {
-      if (!host) return Promise.resolve(false); // Closed while loading.
-      renderModel(msg.model);
-      return Promise.resolve(true);
-    }
-    return undefined;
+    return false;
   });
 })();

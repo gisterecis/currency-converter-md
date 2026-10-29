@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head><meta charset="utf-8"><title>FinComBank</title></head>
+<body>
+<!-- Trimmed copy, 29.10.2026 -->
+<input type="text" maxlength="50" id="cards_date" name="cards_date" class="txt" value="30.10.2026" readonly="readonly" style="width:110px;">
+<table><tbody id="htmlCardsCurrencyConverter">
+			<tr class="valute" data-code="MDL" data-rate-buy="1" data-rate-sell="1">
+    <td>MDL</td>
+    <td><input type="text" class="buy" value="100" name="buy"/></td>
+    <td><input type="text" class="sell" value="" name="sell"/></td>
+</tr>
+            <tr class="valute" data-code="EUR" data-rate-buy="19.8600" data-rate-sell="20.3400">
+            <td>EUR</td>
+            <td><input type="text" class="buy" name="buy"/></td>
+            <td><input type="text" class="sell" name="sell"/></td>
+        </tr>
+                <tr class="valute" data-code="USD" data-rate-buy="17.7800" data-rate-sell="18.2800">
+            <td>USD</td>
+            <td><input type="text" class="buy" name="buy"/></td>
+            <td><input type="text" class="sell" name="sell"/></td>
+        </tr>
+    <script>
+	$(function () {
+		$('#htmlCardsCurrencyConverter').htmlCurrencyConverter({
+			head: ".card-converter-txt",
+			textHead: [{ 'buy': 'Eu vînd', 'sell': 'Eu obţin'}, { 'buy': 'Am nevoie', 'sell': 'Eu cumpăr'}]
+            });
+        });
+</script>			</tbody></table>
+</body>
+</html>

@@ -1,28 +1,40 @@
 {
-  "name": "firefox-maib-converter",
-  "version": "1.0.0",
+  "name": "convertor-valutar-md",
+  "version": "2.0.0",
   "private": true,
-  "description": "Firefox add-on: convert selected amounts at maib.md exchange rates",
+  "description": "Browser extension for Firefox and Chrome: convert selected amounts at Moldovan banks' exchange rates",
   "scripts": {
     "test": "node --test",
+    "check-banks": "node scripts/check-banks.mjs",
     "e2e": "node tests/e2e/run.mjs",
+    "e2e:chrome": "node scripts/build.mjs && node tests/e2e/chrome.mjs",
     "lint": "web-ext lint",
-    "build": "web-ext build --overwrite-dest --filename maib-converter-{version}.xpi",
-    "start": "web-ext run --firefox=/usr/bin/firefox-esr --start-url tests/manual.html",
+    "build": "npm run build:firefox && npm run build:chrome",
+    "build:firefox": "web-ext build --overwrite-dest --filename convertor-valutar-md-firefox-{version}.xpi",
+    "build:chrome": "node scripts/build.mjs && web-ext build --source-dir dist/chrome --overwrite-dest --filename convertor-valutar-md-chrome-{version}.zip",
+    "package": "bash scripts/package.sh",
+    "start": "web-ext run --firefox=${FIREFOX:-firefox} --start-url tests/manual.html",
+    "start:chrome": "node scripts/build.mjs && web-ext run --target chromium --chromium-binary=${CHROMIUM:-chromium} --source-dir dist/chrome",
+    "store:screenshots": "node scripts/build.mjs && node tests/e2e/chrome.mjs --store",
     "sign": "web-ext sign --channel=unlisted"
   },
   "webExt": {
     "ignoreFiles": [
       "tests",
+      "scripts",
+      "store",
+      "dist",
+      "release",
+      "manifest.chrome.json",
       "node_modules",
       "package.json",
       "package-lock.json",
       "README.md",
-      "web-ext-artifacts"
+      "web-ext-artifacts",
+      "icons/icon.svg"
     ]
   },
   "devDependencies": {
-    "linkedom": "^0.18.13",
     "web-ext": "^10.7.0"
   }
 }
