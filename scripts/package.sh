@@ -121,7 +121,7 @@ const expect = (ok, what) => ok || problems.push(what);
 
 const REQUIRED = ["manifest.json", "LICENSE", "background.js", "content/box.js", "content/chip.js", "options/options.html", "icons/icon-128.png",
   "_locales/ro/messages.json", "_locales/en/messages.json", "_locales/ru/messages.json"];
-const FORBIDDEN = /^(tests|scripts|store|dist|release|node_modules|web-ext-artifacts)\/|^(package(-lock)?\.json|manifest\.chrome\.json|README\.md|SECURITY\.md)$/;
+const FORBIDDEN = /^(tests|scripts|store|docs|dist|release|node_modules|web-ext-artifacts)\/|^(package(-lock)?\.json|manifest\.chrome\.json|README\.md|SECURITY\.md)$/;
 
 for (const [label, pkg] of [["firefox", firefoxPkg], ["chrome", chromePkg]]) {
   const files = entries(pkg);
@@ -156,11 +156,11 @@ fi
 
 step "Copying store assets"
 mkdir -p "$OUT/store"
-cp store/listing.md store/chrome-web-store.md store/privacy-policy.html store/promo-440x280.png "$OUT/store/"
+cp store/listing.md store/chrome-web-store.md docs/privacy-policy.html store/promo-440x280.png "$OUT/store/"
 cp -R store/screenshots "$OUT/store/screenshots"
 cp icons/icon-128.png "$OUT/store/icon-128.png"
-if grep -q CONTACT_EMAIL store/privacy-policy.html; then
-  warn "store/privacy-policy.html still has CONTACT_EMAIL placeholders; fill them in before hosting it"
+if grep -q CONTACT_EMAIL docs/privacy-policy.html; then
+  warn "docs/privacy-policy.html still has CONTACT_EMAIL placeholders; fill them in before hosting it"
 fi
 
 step "Checksums"
