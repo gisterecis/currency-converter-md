@@ -93,7 +93,7 @@
     "message": "the $1 page layout changed"
   },
   "errBlocked": {
-    "message": "$1 blocked the request (bot check)"
+    "message": "$1 blocked the request (bot check). Open the bank's rates page in a tab, then press ⟳."
   },
   "errBusy": {
     "message": "$1 is limiting requests, try again in a few minutes"
