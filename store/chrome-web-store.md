@@ -1,14 +1,14 @@
 # Publishing on the Chrome Web Store
 
-The package is `web-ext-artifacts/convertor-valutar-md-chrome-<version>.zip` (`npm run build:chrome`). Run
-`npm test && npm run e2e:chrome` before each upload.
+The package is `release/<version>/convertor-valutar-md-chrome-<version>.zip` (`scripts/package.sh`, which also
+tests, lints and checks it; `npm run build:chrome` alone puts it in `web-ext-artifacts/`). Run
+`scripts/package.sh --e2e` before each upload.
 
 ## One-time setup (you)
 
 1. Register a developer account at https://chrome.google.com/webstore/devconsole (one-time US$5 fee) and verify
    the contact email.
-2. Replace the three `CONTACT_EMAIL` placeholders in `privacy-policy.html` with the address you want to publish,
-   then host the page at a public URL, for example GitHub Pages. The dashboard needs a direct link to the policy
+2. Host `privacy-policy.html` (contact: gisterecis@moldchem.com) at a public URL, for example GitHub Pages. The dashboard needs a direct link to the policy
    page itself.
 
 ## New item
