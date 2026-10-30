@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = path.join(ROOT, "dist", "chrome");
-const COPY = ["_locales", "icons", "lib", "content", "options", "popup", "background.js"];
+const COPY = ["_locales", "icons", "lib", "content", "options", "popup", "background.js", "LICENSE"];
 
 const read = (f) => JSON.parse(fs.readFileSync(path.join(ROOT, f), "utf8"));
 const firefox = read("manifest.json");
