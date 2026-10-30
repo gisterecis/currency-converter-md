@@ -93,7 +93,7 @@
     "message": "pagina $1 s-a schimbat"
   },
   "errBlocked": {
-    "message": "$1 a blocat cererea (verificare anti-bot)"
+    "message": "$1 a blocat cererea (verificare anti-bot). Deschide pagina de curs a băncii într-o filă, apoi apasă ⟳."
   },
   "errBusy": {
     "message": "$1 limitează cererile, încearcă peste câteva minute"
