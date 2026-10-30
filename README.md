@@ -140,4 +140,6 @@ The script also checks that each package has the right manifest and every backgr
 store files slipped in. `npm run package` runs the same script.
 
 `store/chrome-web-store.md` has the submission steps, the single-purpose statement, the permission justifications
-and the privacy answers. `store/listing.md` has the listing text in all three languages.
+and the privacy answers. `store/listing.md` has the listing text in all three languages. Both versions ask for the
+same permissions (Firefox's `menus` is Chrome's `contextMenus`): the 11 bank sites plus `activeTab`, so the
+justifications there also answer addons.mozilla.org reviewers.

@@ -15,17 +15,22 @@ function matches(pattern, url) {
   return m[2] ? u.hostname === m[3] || u.hostname.endsWith(`.${m[3]}`) : u.hostname === m[3];
 }
 
-test("Chrome host permissions cover every bank request and page", () => {
-  for (const bank of Banks.all()) {
-    const urls = [...bank.requests().map((r) => r.url), bank.pageUrl("ro")];
-    for (const url of urls) assert.ok(chrome.host_permissions.some((p) => matches(p, url)), `${bank.id}: ${url}`);
+test("host permissions cover every bank request and page", () => {
+  for (const m of [chrome, manifest]) {
+    for (const bank of Banks.all()) {
+      const urls = [...bank.requests().map((r) => r.url), bank.pageUrl("ro")];
+      for (const url of urls) assert.ok(m.host_permissions.some((p) => matches(p, url)), `${bank.id}: ${url}`);
+    }
   }
 });
 
-test("Chrome asks only for bank sites, not every site", () => {
-  assert.ok(!chrome.host_permissions.includes("<all_urls>"));
-  assert.equal(chrome.host_permissions.length, Banks.ORDER.length);
-  assert.ok(chrome.permissions.includes("activeTab"));
+test("both browsers ask only for bank sites, not every site", () => {
+  for (const m of [chrome, manifest]) {
+    assert.ok(!m.host_permissions.includes("<all_urls>"));
+    assert.equal(m.host_permissions.length, Banks.ORDER.length);
+    assert.ok(m.permissions.includes("activeTab"));
+  }
+  assert.deepEqual(manifest.host_permissions, chrome.host_permissions);
 });
 
 test("every bank file is a background script, after the registry and before rates.js", () => {
