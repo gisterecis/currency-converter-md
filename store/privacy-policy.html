@@ -28,8 +28,11 @@
       <li><strong>Textul selectat</strong> este analizat doar în browserul tău, ca să găsească suma și valuta. Nu
         este trimis nicăieri.</li>
       <li><strong>Cursurile valutare</strong> sunt descărcate de pe paginile publice ale băncii alese (și ale BNM).
-        Cererile nu conțin date despre tine sau despre pagina pe care ești. Ca la orice vizită pe acele site-uri,
-        banca vede adresa IP și, dacă ai vizitat site-ul, cookie-urile pe care ți le-a setat.</li>
+        Cererile nu conțin date despre tine sau despre pagina pe care ești și sunt trimise fără cookie-uri, deci
+        fără sesiunea ta de internet banking. Excepție fac maib și Eximbank: site-urile lor verifică dacă vizitatorul
+        e un browser, iar pentru asta e nevoie de cookie-urile lor, ca la o vizită obișnuită. Ca la orice vizită,
+        banca vede adresa IP. Extensia are acces doar la adresa paginii publice cu cursuri a fiecărei bănci,
+        nu și la alte subdomenii ale băncii.</li>
       <li><strong>În browser</strong> se păstrează doar banca și limba alese și ultimul curs descărcat (o oră).
         Le poți șterge dezinstalând extensia.</li>
       <li>Nu există analitică, reclame, conturi sau servere proprii.</li>
@@ -46,8 +49,11 @@
       <li><strong>Selected text</strong> is parsed only in your browser to find the amount and currency. It is never
         sent anywhere.</li>
       <li><strong>Exchange rates</strong> are downloaded from the public pages of the bank you chose (and the
-        National Bank of Moldova). The requests contain nothing about you or the page you're on. As with any visit
-        to those sites, the bank sees your IP address and any cookies it set if you have visited it.</li>
+        National Bank of Moldova). The requests contain nothing about you or the page you're on, and they're sent
+        without cookies, so without your internet banking session. The exception is maib and Eximbank: their sites
+        check that the visitor is a browser, which needs their cookies, as an ordinary visit would. As with any
+        visit, the bank sees your IP address. The extension can only reach the host of each bank's public rate page, not
+        the bank's other subdomains.</li>
       <li><strong>In your browser</strong> the extension keeps only your chosen bank and language and the last rates
         it downloaded (for one hour). Uninstalling the extension removes them.</li>
       <li>There is no analytics, advertising, account or server of our own.</li>
@@ -64,8 +70,10 @@
       <li><strong>Выделенный текст</strong> анализируется только в вашем браузере, чтобы найти сумму и валюту. Он
         никуда не отправляется.</li>
       <li><strong>Курсы валют</strong> загружаются с публичных страниц выбранного банка (и НБМ). Запросы не содержат
-        данных о вас или о странице, которую вы просматриваете. Как и при любом посещении этих сайтов, банк видит ваш
-        IP-адрес и cookie, которые он установил, если вы заходили на сайт.</li>
+        данных о вас или о странице, которую вы просматриваете, и отправляются без cookie, то есть без вашей сессии
+        интернет-банкинга. Исключение — maib и Eximbank: их сайты проверяют, что посетитель — браузер, и для этого
+        нужны их cookie, как при обычном посещении. Как и при любом посещении, банк видит ваш IP-адрес. Расширение
+        имеет доступ только к адресу публичной страницы курсов каждого банка, но не к другим его поддоменам.</li>
       <li><strong>В браузере</strong> хранятся только выбранные банк и язык и последний загруженный курс (один час).
         Они удаляются вместе с расширением.</li>
       <li>Нет аналитики, рекламы, учётных записей и собственных серверов.</li>

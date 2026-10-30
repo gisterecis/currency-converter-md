@@ -28,9 +28,14 @@ All 10 banks licensed by the BNM (October 2026), plus the BNM official rate:
 Rates are cached for one hour; ⟳ fetches fresh ones. Cash results include the 0.1% fee on buying foreign cash (Law
 827-XIV), and those values are marked with `*`.
 
-maib and Eximbank sit behind Imperva bot checks. The extension first fetches their page with your cookies for that
+Rate requests go without cookies, so they never carry an internet banking session. The only exceptions are maib and
+Eximbank, which sit behind Imperva bot checks: the extension fetches their page with the check's cookies for that
 site. If that's blocked, it opens the page in a background tab for a second or two so the check can pass, reads the
 tables, and closes the tab.
+
+The extension asks for one exact host per bank (`www.maib.md`, `micb.md`, …), the one its public rate page is on.
+Browsers ignore the path in a host permission, so a single page can't be requested, but leaving out wildcard
+subdomains keeps the banks' other subdomains, where internet banking usually lives, out of reach.
 
 ## Using it
 
