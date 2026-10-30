@@ -18,7 +18,7 @@ tests, lints and checks it; `npm run build:chrome` alone puts it in `web-ext-art
    `icons/icon-128.png`, small promo tile `store/promo-440x280.png`, screenshots `store/screenshots/<lang>-*.png`.
 3. **Privacy practices:** use the answers below.
 4. **Distribution:** public, all regions (or only Moldova and neighbours if you prefer).
-5. Submit for review. Host permissions for 11 specific sites usually mean a review of a few days.
+5. Submit for review. Host permissions for 11 specific hosts usually mean a review of a few days.
 
 ## Privacy practices answers
 
@@ -35,7 +35,7 @@ tests, lints and checks it; `npm run build:chrome` alone puts it in `web-ext-art
 | `scripting` | Injects the result box into the current tab (under activeTab) after a menu click, and reads the rate tables from a bank's page opened in a background tab when that bank's site requires a browser check (maib, Eximbank). |
 | `storage` | Saves the user's chosen bank and language, and caches each bank's rates for one hour to avoid repeated requests. |
 | `notifications` | Shows the result as a system notification on pages where extensions can't draw (chrome:// pages, the PDF viewer, the Web Store). |
-| Host permissions (`*.maib.md`, `*.micb.md`, `*.victoriabank.md`, `*.otpbank.md`, `*.procreditbank.md`, `*.fincombank.com`, `*.eximbank.md`, `*.energbank.com`, `*.comertbank.md`, `*.ecb.md`, `*.bnm.md`) | Downloads the public exchange-rate pages or rate APIs of these banks and the National Bank of Moldova. No other sites are contacted. |
+| Host permissions (`www.maib.md`, `micb.md`, `www.victoriabank.md`, `www.otpbank.md`, `procreditbank.md`, `fincombank.com`, `eximbank.md`, `www.energbank.com`, `comertbank.md`, `www.ecb.md`, `www.bnm.md`) | Downloads the public exchange-rate pages or rate APIs of these banks and the National Bank of Moldova. Only the exact host of each bank's public rate page, never the bank's other subdomains; requests carry no cookies (except the bot-check cookie for maib and Eximbank) and so no banking session. No other sites are contacted. |
 
 **Remote code:** No. All code is in the package.
 

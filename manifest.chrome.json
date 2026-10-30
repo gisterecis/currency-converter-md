@@ -13,17 +13,17 @@
   },
   "permissions": ["contextMenus", "storage", "scripting", "notifications", "activeTab"],
   "host_permissions": [
-    "https://*.maib.md/*",
-    "https://*.micb.md/*",
-    "https://*.victoriabank.md/*",
-    "https://*.otpbank.md/*",
-    "https://*.procreditbank.md/*",
-    "https://*.fincombank.com/*",
-    "https://*.eximbank.md/*",
-    "https://*.energbank.com/*",
-    "https://*.comertbank.md/*",
-    "https://*.ecb.md/*",
-    "https://*.bnm.md/*"
+    "https://www.maib.md/*",
+    "https://micb.md/*",
+    "https://www.victoriabank.md/*",
+    "https://www.otpbank.md/*",
+    "https://procreditbank.md/*",
+    "https://fincombank.com/*",
+    "https://eximbank.md/*",
+    "https://www.energbank.com/*",
+    "https://comertbank.md/*",
+    "https://www.ecb.md/*",
+    "https://www.bnm.md/*"
   ],
   "background": {
     "service_worker": "sw.js"

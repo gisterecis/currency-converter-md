@@ -7,12 +7,10 @@ const { Banks } = globalThis;
 
 const chrome = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.chrome.json"), "utf8"));
 
-// "https://*.maib.md/*" matches www.maib.md and maib.md.
 function matches(pattern, url) {
-  const m = /^(https?):\/\/(\*\.)?([^/]+)\/(.*)$/.exec(pattern);
+  const m = /^(https?):\/\/([^/*]+)\/\*$/.exec(pattern);
   const u = new URL(url);
-  if (!m || u.protocol !== `${m[1]}:`) return false;
-  return m[2] ? u.hostname === m[3] || u.hostname.endsWith(`.${m[3]}`) : u.hostname === m[3];
+  return !!m && u.protocol === `${m[1]}:` && u.hostname === m[2];
 }
 
 test("host permissions cover every bank request and page", () => {
@@ -24,9 +22,11 @@ test("host permissions cover every bank request and page", () => {
   }
 });
 
-test("both browsers ask only for bank sites, not every site", () => {
+// One exact host per bank: no wildcard subdomains, which would also cover the
+// banks' internet banking sites.
+test("both browsers ask only for each bank's rates host, not every site or subdomain", () => {
   for (const m of [chrome, manifest]) {
-    assert.ok(!m.host_permissions.includes("<all_urls>"));
+    for (const p of m.host_permissions) assert.match(p, /^https:\/\/[a-z0-9.-]+\/\*$/, p);
     assert.equal(m.host_permissions.length, Banks.ORDER.length);
     assert.ok(m.permissions.includes("activeTab"));
   }
