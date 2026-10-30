@@ -167,3 +167,8 @@ and the privacy answers. `store/listing.md` has the listing text in all three la
 same permissions (Firefox's `menus` is Chrome's `contextMenus`): the 11 bank sites plus `activeTab`, so the
 justifications there also answer addons.mozilla.org reviewers. Firefox also lists every site as an optional
 permission, requested only on Android when you turn on the selection button.
+
+## License
+
+MIT, see [LICENSE](LICENSE). The exchange rates belong to the banks and the National Bank of Moldova; the
+extension only shows what they publish.
