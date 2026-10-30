@@ -29,6 +29,14 @@ const server = http.createServer((req, res) => {
 });
 await new Promise((r) => server.listen(0, "127.0.0.1", r));
 const PAGE = `http://127.0.0.1:${server.address().port}/manual.html`;
+// activeTab is only granted by a real menu click, which the protocol can't
+// make, so this test copy may also script the local test server.
+const EXT_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "cv-ext-"));
+const SKIP = new Set([".git", "node_modules", "dist", "release", "web-ext-artifacts"]);
+fs.cpSync(ROOT, EXT_DIR, { recursive: true, filter: (src) => !SKIP.has(path.relative(ROOT, src).split(path.sep)[0]) });
+const testManifest = JSON.parse(fs.readFileSync(path.join(EXT_DIR, "manifest.json"), "utf8"));
+testManifest.host_permissions.push("http://127.0.0.1/*");
+fs.writeFileSync(path.join(EXT_DIR, "manifest.json"), JSON.stringify(testManifest));
 const profile = fs.mkdtempSync(path.join(os.tmpdir(), "cv-ff-"));
 fs.writeFileSync(
   path.join(profile, "user.js"),
@@ -122,7 +130,7 @@ const check = (cond, label, detail) => {
 
 try {
   await cmd("session.new", { capabilities: {} });
-  await cmd("webExtension.install", { extensionData: { type: "path", path: ROOT } });
+  await cmd("webExtension.install", { extensionData: { type: "path", path: EXT_DIR } });
   const harness = await openExtensionPage(`${EXT}/tests/e2e/harness.html`, { closeOthers: true });
 
   const bgEval = (code) =>
