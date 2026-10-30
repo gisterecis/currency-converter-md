@@ -1,9 +1,10 @@
 # Convertor valutar MD (Currency Converter MD)
 
-A browser extension for Firefox and Chrome. Select an amount on any page, right-click, and convert it at the
-exchange rates of your Moldovan bank. The result opens in a small box next to the selection. For each of the bank's
-rate types (cash at branches, card operations and, where the bank publishes it, online/app), it shows what you get
-when you sell the amount and what you pay when you buy it.
+A browser extension for Firefox (desktop and Android) and Chrome. Select an amount on any page, right-click (on
+Android, open it from the Firefox menu), and convert it at the exchange rates of your Moldovan bank. The result
+opens in a small box next to the selection. For each of the bank's rate types (cash at branches, card operations
+and, where the bank publishes it, online/app), it shows what you get when you sell the amount and what you pay when
+you buy it.
 
 The interface is in Romanian (the default), English and Russian.
 
@@ -46,6 +47,13 @@ subdomains keeps the banks' other subdomains, where internet banking usually liv
 - **Chrome** can't change the menu per selection, so it always shows **Convertește „…” în ▸** and the target
   currencies. The box detects the source currency. When it can't, it guesses (MDL, or EUR when converting to MDL)
   and asks you to pick it.
+- **Firefox for Android** has no context menu or keyboard shortcuts for add-ons. Select an amount and open the
+  converter from the Firefox menu under **Extensions**: it starts from the selection (opening it grants
+  `activeTab`). The popup and the settings page also offer an optional button under selected amounts
+  (`⇄ 1.234,56 EUR`); tapping it opens the box, converting as the keyboard shortcut does. The button needs access
+  to every site, so it's an optional permission that's only requested when you turn it on; without it, nothing
+  runs in your pages. It only appears for a bare number or a number with a currency, not for any text that
+  contains a digit. The box and the button keep their size when the page is pinch-zoomed.
 - **The result box:**
   - Large tiles show what you get selling and pay buying, for each rate type. Each tile includes the effective
     rate ("1 EUR = 19,90 MDL"), and a **best** tag marks the better option.
@@ -84,18 +92,27 @@ For regular Firefox, have Mozilla sign it with
 `WEB_EXT_API_KEY='user:…' WEB_EXT_API_SECRET='…' npm run sign` (unlisted), or submit the `.xpi` to
 addons.mozilla.org as a listed add-on. The add-on ID is unchanged from 1.x, so the install upgrades in place.
 
+**Firefox for Android** (142 or later): once it's listed on addons.mozilla.org with Android compatibility ticked,
+install it from there. To try a development copy on a phone, turn on USB debugging (Android developer options) and
+**Remote debugging via USB** (Firefox ⋮ → Settings), connect the phone, then run `adb devices` and
+`ANDROID_DEVICE=<id> npm run start:android`. Use `FIREFOX_APK=org.mozilla.fenix` for Nightly.
+
 ## Development
 
 ```bash
 npm install
-npm test                 # unit tests: parser, conversion, every bank adapter against saved pages, i18n, manifests
+npm test                 # unit tests: parser, conversion, every bank adapter against saved pages, i18n, manifests,
+                         #   and the background without menus/commands, as on Firefox for Android
 npm run check-banks      # fetch every bank live and print what the adapters read
-npm run e2e              # headless Firefox: live rates, tab fallback, menus, settings, box in ro/en/ru, notification
-npm run e2e:chrome       # headless Chromium: same for the Chrome build, including bank switching inside the box
+npm run e2e              # headless Firefox: live rates, tab fallback, menus, settings, box in ro/en/ru, notification,
+                         #   the Android selection button
+npm run e2e:chrome       # headless Chromium: same for the Chrome build, including bank switching inside the box,
+                         #   plus an emulated phone: selection button, touch, pinch-zoom, a desktop-only site
 npm run lint             # web-ext lint (Firefox)
 npm run build            # web-ext-artifacts/convertor-valutar-md-{firefox-<v>.xpi,chrome-<v>.zip}
 npm start                # Firefox with the add-on and tests/manual.html
 npm run start:chrome     # Chromium with dist/chrome
+npm run start:android    # Firefox for Android over adb (see Install)
 npm run store:screenshots  # regenerate store/screenshots/ (1280×800, ro/en/ru)
 ```
 
@@ -116,6 +133,7 @@ The repo root is the Firefox add-on. `scripts/build.mjs` builds the Chrome versi
 | `background.js` | menus, settings, results to the box or a notification |
 | `lib/view.js` | the converter UI shared by the box and the toolbar popup |
 | `content/box.js` | places the box next to the selection (Shadow DOM), injected only when you convert |
+| `content/chip.js` | Firefox for Android: the optional button under a selected amount (registered once allowed) |
 | `popup/` | toolbar converter |
 | `options/` | settings page |
 | `store/` | Chrome Web Store listing text, privacy policy, promo tile, screenshots, submission notes |
@@ -147,4 +165,5 @@ store files slipped in. `npm run package` runs the same script.
 `store/chrome-web-store.md` has the submission steps, the single-purpose statement, the permission justifications
 and the privacy answers. `store/listing.md` has the listing text in all three languages. Both versions ask for the
 same permissions (Firefox's `menus` is Chrome's `contextMenus`): the 11 bank sites plus `activeTab`, so the
-justifications there also answer addons.mozilla.org reviewers.
+justifications there also answer addons.mozilla.org reviewers. Firefox also lists every site as an optional
+permission, requested only on Android when you turn on the selection button.

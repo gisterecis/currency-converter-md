@@ -2,15 +2,32 @@
 <html lang="ro">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Convertor valutar</title>
   <style>
     html, body { margin: 0; }
     body { width: 380px; min-height: 160px; background: #ffffff; }
-    @media (prefers-color-scheme: dark) { body { background: #15181e; } }
+    /* Firefox for Android opens the popup full screen. */
+    .android body { width: auto; }
+    .offer {
+      display: flex; align-items: center; gap: 12px; margin: 0; padding: 12px 14px; border-top: 1px solid #e2e7ed;
+      font: 13px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #475467;
+    }
+    .offer[hidden] { display: none; }
+    .offer button {
+      flex: none; font: inherit; font-weight: 600; color: #ffffff; background: #0b7a75;
+      border: 0; border-radius: 999px; padding: 9px 16px; cursor: pointer;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { background: #15181e; }
+      .offer { color: #98a2b3; border-color: #2c323c; }
+      .offer button { color: #062b28; background: #3cc8b9; }
+    }
   </style>
 </head>
 <body>
   <div id="app"></div>
+  <p id="offer" class="offer" hidden><span id="offer-text"></span><button id="offer-on" type="button"></button></p>
   <script src="../lib/view.js"></script>
   <script src="popup.js"></script>
 </body>

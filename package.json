@@ -15,6 +15,7 @@
     "package": "bash scripts/package.sh",
     "start": "web-ext run --firefox=${FIREFOX:-firefox} --start-url tests/manual.html",
     "start:chrome": "node scripts/build.mjs && web-ext run --target chromium --chromium-binary=${CHROMIUM:-chromium} --source-dir dist/chrome",
+    "start:android": "web-ext run --target firefox-android --android-device=${ANDROID_DEVICE:-} --firefox-apk=${FIREFOX_APK:-org.mozilla.firefox}",
     "store:screenshots": "node scripts/build.mjs && node tests/e2e/chrome.mjs --store",
     "sign": "web-ext sign --channel=unlisted"
   },

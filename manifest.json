@@ -25,6 +25,7 @@
     "https://www.ecb.md/*",
     "https://www.bnm.md/*"
   ],
+  "optional_host_permissions": ["*://*/*"],
   "background": {
     "scripts": [
       "lib/ext.js",
@@ -76,6 +77,9 @@
       "data_collection_permissions": {
         "required": ["none"]
       }
+    },
+    "gecko_android": {
+      "strict_min_version": "142.0"
     }
   }
 }

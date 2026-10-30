@@ -28,7 +28,15 @@
       <p id="saved" class="saved" role="status" aria-live="polite"></p>
     </section>
 
-    <section class="panel">
+    <section id="chip-panel" class="panel" hidden>
+      <label class="toggle">
+        <span id="chip-label"></span>
+        <input id="chip" type="checkbox" role="switch">
+      </label>
+      <p id="chip-help" class="muted small"></p>
+    </section>
+
+    <section id="shortcut-panel" class="panel">
       <h2 id="shortcut-label"></h2>
       <div class="shortcut">
         <span id="shortcut" class="keys"></span>

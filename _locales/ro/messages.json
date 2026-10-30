@@ -155,6 +155,21 @@
   "optIntro": {
     "message": "Selectează o sumă pe orice pagină, dă click dreapta și alege „Convertește…”."
   },
+  "optIntroTouch": {
+    "message": "Selectează o sumă și deschide convertorul din meniul Firefox, la Extensii. Sau activează mai jos butonul care apare sub suma selectată pe orice site."
+  },
+  "optChip": {
+    "message": "Buton sub suma selectată"
+  },
+  "optChipHelp": {
+    "message": "Pe orice site, sub suma pe care o selectezi apare un buton care o convertește. Firefox îți va cere acces la toate site-urile; textul selectat nu părăsește browserul."
+  },
+  "chipOffer": {
+    "message": "Pune un buton sub sumele pe care le selectezi, pe orice site. Firefox va cere acces la toate site-urile."
+  },
+  "chipTurnOn": {
+    "message": "Activează"
+  },
   "optBank": {
     "message": "Banca ale cărei cursuri le folosești"
   },

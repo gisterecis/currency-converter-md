@@ -33,6 +33,14 @@ test("both browsers ask only for each bank's rates host, not every site or subdo
   assert.deepEqual(manifest.host_permissions, chrome.host_permissions);
 });
 
+// The Android selection button needs every web page. It's optional, asked for
+// only when the user turns the button on; Chrome has menus, so never asks.
+test("Firefox asks for every site only as an optional permission", () => {
+  assert.deepEqual(manifest.optional_host_permissions, ["*://*/*"]);
+  assert.ok(!chrome.optional_host_permissions);
+  for (const m of [chrome, manifest]) assert.ok(!m.host_permissions.some((p) => p.includes("<all_urls>") || p.startsWith("*")));
+});
+
 test("every bank file is a background script, after the registry and before rates.js", () => {
   const scripts = manifest.background.scripts;
   const files = fs.readdirSync(path.join(ROOT, "lib/banks")).map((f) => `lib/banks/${f}`);

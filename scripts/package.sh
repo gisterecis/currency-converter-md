@@ -119,7 +119,7 @@ const read = (pkg, file) => execFileSync("unzip", ["-p", pkg, file], { encoding:
 const problems = [];
 const expect = (ok, what) => ok || problems.push(what);
 
-const REQUIRED = ["manifest.json", "background.js", "content/box.js", "options/options.html", "icons/icon-128.png",
+const REQUIRED = ["manifest.json", "background.js", "content/box.js", "content/chip.js", "options/options.html", "icons/icon-128.png",
   "_locales/ro/messages.json", "_locales/en/messages.json", "_locales/ru/messages.json"];
 const FORBIDDEN = /^(tests|scripts|store|dist|release|node_modules|web-ext-artifacts)\/|^(package(-lock)?\.json|manifest\.chrome\.json|README\.md)$/;
 

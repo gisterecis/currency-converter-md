@@ -155,6 +155,21 @@
   "optIntro": {
     "message": "Select an amount on any page, right-click and choose “Convert…”."
   },
+  "optIntroTouch": {
+    "message": "Select an amount, then open the converter from the Firefox menu under Extensions. Or turn on the button below, which appears under a selected amount on any site."
+  },
+  "optChip": {
+    "message": "Button under the selected amount"
+  },
+  "optChipHelp": {
+    "message": "On any site, a button appears under the amount you select to convert it. Firefox will ask for access to all sites; the selected text never leaves your browser."
+  },
+  "chipOffer": {
+    "message": "Add a button under amounts you select on any site. Firefox will ask for access to all sites."
+  },
+  "chipTurnOn": {
+    "message": "Turn on"
+  },
   "optBank": {
     "message": "Bank whose rates you use"
   },
