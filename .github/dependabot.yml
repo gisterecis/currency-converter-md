@@ -1,0 +1,9 @@
+# Dependabot version updates. web-ext is the only dependency, and only a
+# development tool: nothing from npm ships in the extension.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5

@@ -3,3 +3,11 @@ web-ext-artifacts/
 dist/
 release/
 .amo-upload-uuid
+
+# Credentials: `npm run sign` reads WEB_EXT_API_KEY and WEB_EXT_API_SECRET from
+# the environment. Keep them out of files in the repo.
+.env
+.env.*
+.web-extrc*
+web-ext-config.*
+*.pem
