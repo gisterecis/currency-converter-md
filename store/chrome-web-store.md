@@ -8,8 +8,8 @@ tests, lints and checks it; `npm run build:chrome` alone puts it in `web-ext-art
 
 1. Register a developer account at https://chrome.google.com/webstore/devconsole (one-time US$5 fee) and verify
    the contact email.
-2. Host `privacy-policy.html` (contact: gisterecis@moldchem.com) at a public URL, for example GitHub Pages. The dashboard needs a direct link to the policy
-   page itself.
+2. The privacy policy is `docs/privacy-policy.html` (contact: gisterecis@moldchem.com). GitHub Pages publishes it from
+   `docs/` on `main` at https://gisterecis.github.io/currency-converter-md/privacy-policy.html; edits go live a minute after they're merged.
 
 ## New item
 
@@ -43,7 +43,7 @@ tests, lints and checks it; `npm run build:chrome` alone puts it in `web-ext-art
 locally and never leaves the browser; the only network requests are GETs for public rate pages, which carry no
 user data. Certify the three statements (no selling, no unrelated use, no creditworthiness use).
 
-**Privacy policy URL:** the hosted `privacy-policy.html`.
+**Privacy policy URL:** https://gisterecis.github.io/currency-converter-md/privacy-policy.html
 
 ## Updating
 

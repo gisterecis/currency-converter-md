@@ -25,6 +25,7 @@
       "tests",
       "scripts",
       "store",
+      "docs",
       "dist",
       "release",
       "manifest.chrome.json",

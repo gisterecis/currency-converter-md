@@ -136,7 +136,8 @@ The repo root is the Firefox add-on. `scripts/build.mjs` builds the Chrome versi
 | `content/chip.js` | Firefox for Android: the optional button under a selected amount (registered once allowed) |
 | `popup/` | toolbar converter |
 | `options/` | settings page |
-| `store/` | Chrome Web Store listing text, privacy policy, promo tile, screenshots, submission notes |
+| `store/` | Chrome Web Store listing text, promo tile, screenshots, submission notes |
+| `docs/` | the privacy policy, published by GitHub Pages at https://gisterecis.github.io/currency-converter-md/privacy-policy.html |
 
 ### When a bank changes its site
 
