@@ -161,16 +161,48 @@ async function resetMenus() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Firefox for Android has no context menus. There the popup converts the
+// selection, and once the user allows access to every site (optional, from
+// the popup or the settings page) content/chip.js runs in every page and
+// shows a button under a selected amount.
+
+const ALL_SITES = { origins: ["*://*/*"] };
+const CHIP = { id: "cv-chip", matches: ALL_SITES.origins, js: ["lib/parse.js", "content/chip.js"], runAt: "document_idle" };
+
+// `fresh` after an install, an update or the user allowing it: the registration
+// is replaced, so it lists this version's files, and open pages get the button too.
+async function setUpChip({ fresh }) {
+  const allowed = await ext.permissions.contains(ALL_SITES).catch(() => false);
+  const known = await ext.scripting.getRegisteredContentScripts({ ids: [CHIP.id] });
+  if (known.length && (fresh || !allowed)) await ext.scripting.unregisterContentScripts({ ids: [CHIP.id] });
+  if (!allowed || (known.length && !fresh)) return;
+  await ext.scripting.registerContentScripts([CHIP]);
+  if (!fresh) return;
+  for (const tab of await ext.tabs.query({})) {
+    ext.scripting.executeScript({ target: { tabId: tab.id }, files: CHIP.js }).catch(() => {});
+  }
+}
+
+async function setUpSelection({ installed }) {
+  if (Ext.menus) await resetMenus();
+  else await setUpChip({ fresh: installed });
+}
+
 ext.runtime.onInstalled.addListener(() => {
   ext.storage.local.remove("rates").catch(() => {}); // 1.x cache (maib only).
-  resetMenus();
+  setUpSelection({ installed: true });
 });
-ext.runtime.onStartup.addListener(resetMenus);
+ext.runtime.onStartup.addListener(() => setUpSelection({ installed: false }));
+if (!Ext.menus) {
+  ext.permissions.onAdded.addListener(() => setUpChip({ fresh: true }));
+  ext.permissions.onRemoved.addListener(() => setUpChip({ fresh: false }));
+}
 
 // Chrome's menu lists the bank's currencies and is in the UI language, so
 // rebuild it when either changes.
 ext.storage.onChanged.addListener(async (changes, area) => {
-  if (Ext.smartMenus) return;
+  if (!Ext.menus || Ext.smartMenus) return;
   if ("bank" in changes || "lang" in changes) return buildStaticMenu();
   if (area === "local") {
     const { bank } = await getSettings();
@@ -206,7 +238,7 @@ function onMenuClicked(info, tab) {
   showConversion({ request, tab, frameId: info.frameId || 0, targetElementId: info.targetElementId });
 }
 
-Ext.menus.onClicked.addListener(onMenuClicked);
+if (Ext.menus) Ext.menus.onClicked.addListener(onMenuClicked);
 
 // ---------------------------------------------------------------------------
 // Conversion results: floating box in the page, or a notification where
@@ -297,9 +329,9 @@ async function convertFromBox({ request, force }) {
 }
 
 // ---------------------------------------------------------------------------
-// Keyboard shortcut: convert the selection in the active tab without the menu
-// (amounts in lei go to the last foreign currency, others to lei). With
-// nothing selected, open the toolbar converter.
+// Keyboard shortcut and the Android selection button: convert the selection
+// without the menu (amounts in lei go to the last foreign currency, others to
+// lei). The shortcut with nothing selected opens the toolbar converter.
 
 async function readSelection(tabId) {
   const func = () => {
@@ -322,17 +354,26 @@ async function readSelection(tabId) {
   return { selection: "", frameId: 0 };
 }
 
-async function convertSelectionInTab(tab) {
-  const { selection, frameId } = tab && tab.id >= 0 ? await readSelection(tab.id) : { selection: "", frameId: 0 };
+// -> { selection, src, dst }, or null if the selection has no amount.
+async function selectionRequest(selection) {
   const parsed = selection.trim() && CurrencyParse.parseSelection(selection);
-  if (!parsed) {
-    if (ext.action && ext.action.openPopup) await ext.action.openPopup().catch(() => {});
-    return;
-  }
+  if (!parsed) return null;
   const { settings } = await context();
   const src = parsed.currency || null;
-  const dst = src && src !== "MDL" ? "MDL" : settings.lastForeign;
-  await showConversion({ request: { selection, src, dst }, tab, frameId });
+  return { selection, src, dst: src && src !== "MDL" ? "MDL" : settings.lastForeign };
+}
+
+// -> false if the selection has no amount.
+async function convertSelection(selection, tab, frameId) {
+  const request = await selectionRequest(selection);
+  if (request) await showConversion({ request, tab, frameId });
+  return !!request;
+}
+
+async function convertSelectionInTab(tab) {
+  const { selection, frameId } = tab && tab.id >= 0 ? await readSelection(tab.id) : { selection: "", frameId: 0 };
+  if (await convertSelection(selection, tab, frameId)) return;
+  if (ext.action && ext.action.openPopup) await ext.action.openPopup().catch(() => {});
 }
 
 if (ext.commands) {
@@ -343,26 +384,48 @@ if (ext.commands) {
   });
 }
 
+// On Android, with no menu and the button perhaps off, the popup starts from
+// the amount selected in the current tab (opening the popup grants activeTab),
+// and offers the button.
+async function popupData() {
+  const { lang, t, settings } = await context();
+  const data = { lang, strings: viewStrings(t), bank: settings.bank };
+  if (Ext.menus) return data;
+  data.offer = { text: t("chipOffer"), button: t("chipTurnOn") };
+  const [tab] = await ext.tabs.query({ active: true, currentWindow: true }).catch(() => []);
+  const request = tab && tab.id >= 0 && (await selectionRequest((await readSelection(tab.id)).selection));
+  if (request) {
+    const selection = request.selection.trim();
+    data.selection = { ...request, selection, src: resolveSource(request, CurrencyParse.parseSelection(selection)).src };
+  }
+  return data;
+}
+
 async function optionsData() {
   const { settings, lang, t } = await context();
   const keys = [
     "optionsTitle", "optIntro", "optBank", "optLang", "optLangAuto", "optSaved", "optDisclaimer", "optPrivacy", "appName",
-    "optShortcut", "optShortcutHelp", "optShortcutNone", "optShortcutChange", "optAbout", "extName",
+    "optShortcut", "optShortcutHelp", "optShortcutNone", "optShortcutChange", "optAbout", "extName", "optChip", "optChipHelp",
   ];
-  return { settings, lang, banks: bankList(t), strings: Object.fromEntries(keys.map((k) => [k, t(k)])) };
+  const strings = Object.fromEntries(keys.map((k) => [k, t(k)]));
+  // No right-click on Android: the intro points at the selection button.
+  if (!Ext.menus) strings.optIntro = t("optIntroTouch");
+  return { settings, lang, banks: bankList(t), strings };
 }
 
-Ext.onMessage((msg) => {
+Ext.onMessage((msg, sender) => {
   if (!msg || typeof msg.type !== "string") return undefined;
   switch (msg.type) {
     case "cv-convert":
       return convertFromBox(msg);
+    case "cv-chip":
+      return sender.tab ? convertSelection(String(msg.selection || ""), sender.tab, sender.frameId || 0) : undefined;
     case "cv-options":
       return ext.runtime.openOptionsPage();
     case "cv-options-data":
       return optionsData();
     case "cv-popup-data":
-      return context().then(({ lang, t, settings }) => ({ lang, strings: viewStrings(t), bank: settings.bank }));
+      return popupData();
     case "cv-save-settings":
       return saveSettings(msg.settings || {}).then(optionsData);
     default:

@@ -1,5 +1,6 @@
-// Settings page: the bank whose rates are used, the interface language, and
-// the keyboard shortcut. The background script owns the settings and strings.
+// Settings page: the bank whose rates are used, the interface language, the
+// keyboard shortcut (desktop) and the selection button (Android). The
+// background script owns the settings and strings.
 (() => {
   "use strict";
   const api = globalThis.browser || globalThis.chrome;
@@ -46,6 +47,8 @@
     $("shortcut-label").textContent = s.optShortcut;
     $("shortcut-help").textContent = s.optShortcutHelp;
     $("shortcut-change").textContent = s.optShortcutChange;
+    $("chip-label").textContent = s.optChip;
+    $("chip-help").textContent = s.optChipHelp;
     $("about-label").textContent = s.optAbout;
     $("disclaimer").textContent = s.optDisclaimer;
     $("privacy").textContent = s.optPrivacy;
@@ -68,6 +71,24 @@
     else api.tabs.create({ url: "chrome://extensions/shortcuts" });
   }
 
+  // Firefox for Android: the button under selected amounts, which needs access
+  // to every site. request() has to run straight from the tap; the background
+  // registers or removes the button.
+  const ALL_SITES = { origins: ["*://*/*"] };
+  async function renderChip() {
+    $("chip").checked = await api.permissions.contains(ALL_SITES).catch(() => false);
+  }
+  function toggleChip(e) {
+    const change = e.target.checked ? api.permissions.request(ALL_SITES) : api.permissions.remove(ALL_SITES);
+    change.catch(() => {}).finally(renderChip);
+  }
+
+  // Firefox for Android has no context menu and no keyboard shortcuts for add-ons.
+  const android = !(api.menus || api.contextMenus);
+  $("chip-panel").hidden = !android;
+  if (android) renderChip();
+  $("shortcut-panel").hidden = !api.commands;
+  $("chip").addEventListener("change", toggleChip);
   $("bank").addEventListener("change", (e) => save({ bank: e.target.value }));
   $("lang").addEventListener("change", (e) => save({ lang: e.target.value }));
   $("shortcut-change").addEventListener("click", changeShortcut);

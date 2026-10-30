@@ -7,7 +7,8 @@ you paste.
 - **Chrome Web Store** (Store listing tab): paste **Description** for each language; add English and Russian under
   "Localize", with Romanian as the default. The name and short description come from the package
   (`_locales/*/messages.json`), so they're shown here only for reference.
-- **addons.mozilla.org**: paste **Name**, **Summary** and **Description** for each language.
+- **addons.mozilla.org**: paste **Name**, **Summary** and **Description** for each language. When uploading the
+  `.xpi`, tick both "Firefox" and "Firefox for Android" as compatible applications.
 - Category: Tools.
 - Images: `../icons/icon-128.png`, `promo-440x280.png` (small promo tile), and `screenshots/<lang>-1.png` to
   `screenshots/<lang>-3.png` (1280×800). Regenerate them with `npm run store:screenshots`.
@@ -40,6 +41,8 @@ Selectează o sumă pe orice pagină (de exemplu „1.299,00 €”, „$849.99�
 • care variantă e cea mai bună și cursul efectiv („1 EUR = 19,90 MDL”).
 
 Click pe un rezultat îl copiază. Suma se poate modifica direct în fereastră. Butonul din bara de instrumente deschide convertorul fără să selectezi nimic, iar Alt+Shift+C convertește selecția fără meniu.
+
+Pe Firefox pentru Android: selectează suma și deschide convertorul din meniul Firefox, la Extensii. Dacă vrei, activează un buton care apare direct sub suma selectată, pe orice site.
 
 Bănci: maib, Moldindconbank, Victoriabank, OTP Bank, ProCredit Bank, FinComBank, Eximbank, Energbank, Comerțbank, EuroCreditBank, plus cursul oficial BNM (40 de valute). Alegi banca în setări sau direct din fereastră.
 
@@ -77,6 +80,8 @@ Select an amount on any page (say "1.299,00 €", "$849.99" or "24 990 lei"), ri
 
 Click a result to copy it, or edit the amount right in the box. The toolbar button opens the converter without selecting anything, and Alt+Shift+C converts the selection without the menu.
 
+On Firefox for Android, select the amount and open the converter from the Firefox menu, under Extensions. If you like, turn on a button that appears right under the selected amount on any site.
+
 Banks: maib, Moldindconbank, Victoriabank, OTP Bank, ProCredit Bank, FinComBank, Eximbank, Energbank, Comerțbank, EuroCreditBank, plus the National Bank of Moldova's official rate (40 currencies). Pick your bank in the settings or straight from the box.
 
 Understands 1.234,56 · 1,234.56 · 1 234,56 and currencies written as symbols, codes or words (€, $, lei, dolari, евро, руб.). When the separator is ambiguous (1,234) it shows both readings.
@@ -112,6 +117,8 @@ Rates are read directly from the banks' websites, kept for an hour, and are for 
 • какой вариант выгоднее и фактический курс («1 EUR = 19,90 MDL»).
 
 Нажмите на результат, чтобы скопировать его, или измените сумму прямо в окошке. Кнопка на панели открывает конвертер без выделения, а Alt+Shift+C конвертирует выделенное без меню.
+
+В Firefox для Android выделите сумму и откройте конвертер из меню Firefox, в разделе «Расширения». При желании включите кнопку, которая появляется прямо под выделенной суммой на любом сайте.
 
 Банки: maib, Moldindconbank, Victoriabank, OTP Bank, ProCredit Bank, FinComBank, Eximbank, Energbank, Comerțbank, EuroCreditBank, а также официальный курс НБМ (40 валют). Банк выбирается в настройках или прямо в окошке.
 

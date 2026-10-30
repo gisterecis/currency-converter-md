@@ -1,12 +1,32 @@
 // Toolbar converter: type an amount, pick the currencies and the bank. The
-// last conversion is remembered between openings.
+// last conversion is remembered between openings. On Android it starts from
+// the amount selected in the page and offers the button under selections.
 (async () => {
   "use strict";
   const api = globalThis.browser || globalThis.chrome;
   const KEY = "popup:last";
+  const ALL_SITES = { origins: ["*://*/*"] }; // What the button needs (background.js).
 
-  const data = await api.runtime.sendMessage({ type: "cv-popup-data" });
+  async function showOffer({ text, button }) {
+    if (await api.permissions.contains(ALL_SITES).catch(() => true)) return;
+    const offer = document.getElementById("offer");
+    const on = document.getElementById("offer-on");
+    document.getElementById("offer-text").textContent = text;
+    on.textContent = button;
+    // request() has to run straight from the tap. The background registers the button.
+    on.addEventListener("click", () => {
+      api.permissions.request(ALL_SITES).then((granted) => (offer.hidden = granted), () => {});
+    });
+    offer.hidden = false;
+  }
+
+  const [data, platform] = await Promise.all([
+    api.runtime.sendMessage({ type: "cv-popup-data" }),
+    api.runtime.getPlatformInfo().catch(() => ({})),
+  ]);
+  const android = platform.os === "android";
   document.documentElement.lang = data.lang;
+  document.documentElement.classList.toggle("android", android);
   document.title = data.strings.appName;
 
   let last = {};
@@ -15,7 +35,9 @@
   } catch (e) {
     // Start from the defaults.
   }
-  const request = { selection: last.selection || "100", src: last.src || "EUR", dst: last.dst || "MDL", bank: data.bank };
+  const request = data.selection
+    ? { ...data.selection, bank: data.bank }
+    : { selection: last.selection || "100", src: last.src || "EUR", dst: last.dst || "MDL", bank: data.bank };
 
   const view = globalThis.ConverterView.create({
     mode: "popup",
@@ -31,6 +53,8 @@
     },
   });
   document.getElementById("app").attachShadow({ mode: "open" }).append(view.el);
-  view.focusAmount();
+  // On a phone the keyboard would cover the results.
+  if (!android) view.focusAmount();
   view.send(request);
+  if (data.offer) showOffer(data.offer);
 })();

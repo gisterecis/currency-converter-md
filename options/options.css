@@ -28,6 +28,8 @@ select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); o
 .saved { position: absolute; top: 14px; right: 16px; margin: 0; color: var(--accent); font-weight: 600; font-size: 13px; }
 .panel .field:last-of-type { margin-bottom: 0; }
 .shortcut { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.toggle { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; cursor: pointer; }
+.toggle input { flex: none; width: 20px; height: 20px; margin: 0; accent-color: var(--accent); cursor: pointer; }
 .keys { display: flex; gap: 4px; align-items: center; color: var(--muted); }
 kbd {
   min-width: 26px; padding: 3px 8px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 7px;

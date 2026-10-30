@@ -38,28 +38,49 @@
     host.style.setProperty("top", `${top}px`, "important");
   }
 
-  // Below the selection if it fits, else above; clamped to the viewport.
+  // The part of the page on screen, in page coordinates, and the scale that
+  // undoes pinch-zoom. Phones also show pages without a mobile layout zoomed
+  // out; either way the box keeps its size on screen.
+  function visibleArea() {
+    const vv = window.visualViewport;
+    if (vv) return { left: vv.pageLeft, top: vv.pageTop, width: vv.width, height: vv.height, scale: 1 / vv.scale };
+    const width = document.documentElement.clientWidth || window.innerWidth;
+    return { left: window.scrollX, top: window.scrollY, width, height: window.innerHeight, scale: 1 };
+  }
+
+  // The card's largest size, in its own (unscaled) pixels.
+  function fit(view) {
+    host.style.setProperty("transform", `scale(${view.scale})`, "important");
+    host.style.setProperty("--cv-max-width", `${view.width / view.scale - 2 * MARGIN}px`);
+    host.style.setProperty("--cv-max-height", `${view.height / view.scale - 2 * MARGIN}px`);
+  }
+
+  // Below the selection if it fits, else above; clamped to what's on screen.
   function place() {
-    if (!host || dragged) return;
-    const w = host.offsetWidth;
-    const hgt = host.offsetHeight;
-    const vw = document.documentElement.clientWidth || window.innerWidth;
-    const vh = window.innerHeight;
+    if (!host) return;
+    const view = visibleArea();
+    fit(view);
+    if (dragged) return;
+    const z = view.scale;
+    const w = host.offsetWidth * z;
+    const hgt = host.offsetHeight * z;
+    const gap = GAP * z;
+    const margin = MARGIN * z;
     let left;
     let top;
     if (anchor) {
       left = anchor.left;
-      top = anchor.bottom + GAP;
-      const roomBelow = vh - (anchor.bottom - window.scrollY) - GAP;
-      const roomAbove = anchor.top - window.scrollY - GAP;
-      if (hgt > roomBelow && roomAbove >= hgt) top = anchor.top - GAP - hgt;
+      top = anchor.bottom + gap;
+      const roomBelow = view.top + view.height - anchor.bottom - gap;
+      const roomAbove = anchor.top - view.top - gap;
+      if (hgt > roomBelow && roomAbove >= hgt) top = anchor.top - gap - hgt;
       // Neither side fits: keep the whole box on screen, even over the selection.
-      else if (hgt > roomBelow) top = window.scrollY + Math.max(MARGIN, vh - hgt - MARGIN);
+      else if (hgt > roomBelow) top = view.top + Math.max(margin, view.height - hgt - margin);
     } else {
-      left = window.scrollX + (vw - w) / 2;
-      top = window.scrollY + 16;
+      left = view.left + (view.width - w) / 2;
+      top = view.top + 16 * z;
     }
-    left = Math.max(window.scrollX + MARGIN, Math.min(left, window.scrollX + vw - w - MARGIN));
+    left = Math.max(view.left + margin, Math.min(left, view.left + view.width - w - margin));
     setPosition(left, Math.max(MARGIN, top));
   }
 
@@ -77,9 +98,11 @@
     const up = () => {
       window.removeEventListener("pointermove", move, true);
       window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", up, true);
     };
     window.addEventListener("pointermove", move, true);
     window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", up, true);
   }
 
   function onKey(e) {
@@ -96,6 +119,7 @@
     host = view = null;
     document.removeEventListener("keydown", onKey, true);
     document.removeEventListener("mousedown", onPointer, true);
+    if (window.visualViewport) window.visualViewport.removeEventListener("resize", place);
   }
 
   function open(msg) {
@@ -108,7 +132,7 @@
     host.lang = msg.lang || "ro";
     host.style.cssText =
       "all: initial !important; display: block !important; position: absolute !important;" +
-      " z-index: 2147483647 !important; top: 0; left: 0;";
+      " z-index: 2147483647 !important; top: 0; left: 0; transform-origin: 0 0 !important;";
     const root = host.attachShadow({ mode: "closed" });
     view = globalThis.ConverterView.create({
       mode: "box",
@@ -126,6 +150,8 @@
 
     document.addEventListener("keydown", onKey, true);
     document.addEventListener("mousedown", onPointer, true);
+    // Pinch-zoom while the box is open.
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", place);
   }
 
   // Replies go through sendResponse: Chrome ignores returned promises.

@@ -220,7 +220,9 @@ try {
   const inject = await bgEval(
     `const tab = (await browser.tabs.query({})).find((t) => t.url && t.url.startsWith(${JSON.stringify(PAGE)}));
      if (!tab) return "no test page tab among " + JSON.stringify((await browser.tabs.query({})).map((t) => t.url));
-     try { await browser.scripting.executeScript({target: {tabId: tab.id, frameIds: [0]}, files: ["content/box.js"]}); return "ok"; }
+     // Through the background page: Firefox resolves the files against the calling page, and
+     // reports a script that failed to load in the results rather than rejecting.
+     try { const [r] = await bg.browser.scripting.executeScript({target: {tabId: tab.id, frameIds: [0]}, files: ["lib/view.js", "content/box.js"]}); return r.error ? String(r.error) : "ok"; }
      catch (e) { return String(e); }`
   );
   check(inject === "ok", "box script can be injected into the test page", inject);
@@ -291,6 +293,55 @@ try {
   check(popupText && popupText.includes("Numerar la sucursale") && popupText.includes("1 EUR ="), "toolbar popup converts 100 EUR", popupText && popupText.slice(0, 80));
   // Firefox can't resize or screenshot extension pages over WebDriver; the Chrome run covers those.
   await cmd("browsingContext.close", { context: popup }).catch(() => {});
+
+  // 7c. Firefox for Android's button under a selected amount (content/chip.js).
+  //     Desktop has menus, so the background doesn't register it: inject it.
+  //     The Chrome run covers touch and pinch-zoom.
+  await setSettings({ bank: "maib", lang: "ro" });
+  await cmd("browsingContext.activate", { context: page });
+  const chipInjected = await bgEval(
+    `const tab = (await browser.tabs.query({})).find((t) => t.url && t.url.startsWith(${JSON.stringify(PAGE)}));
+     const [r] = await bg.browser.scripting.executeScript({target: {tabId: tab.id}, files: ["lib/parse.js", "content/chip.js"]});
+     return r.error ? String(r.error) : "ok";`
+  );
+  const selectSpan = (text) =>
+    evaluate(
+      page,
+      `let span = [...document.querySelectorAll("span")].find((s) => s.textContent === ${JSON.stringify(text)});
+       if (!span) { span = document.createElement("span"); span.textContent = ${JSON.stringify(text)}; document.body.prepend(span); }
+       span.scrollIntoView({block: "center"});
+       const range = document.createRange(); range.selectNodeContents(span);
+       getSelection().removeAllRanges(); getSelection().addRange(range);
+       return JSON.stringify(span.getBoundingClientRect());`
+    ).then(JSON.parse);
+  const chipState = async (wait) => {
+    await new Promise((r) => setTimeout(r, wait));
+    return JSON.parse(await evaluate(page, `const c = document.querySelector("cv-converter-chip"); return JSON.stringify(c && c.getBoundingClientRect());`));
+  };
+  await selectSpan("Page 3 of 12");
+  check(chipInjected === "ok", "selection button script can be injected into the test page", chipInjected);
+  check(!(await chipState(700)), "no selection button for text that only contains a number");
+  const amountRect = await selectSpan("1.234,56 €");
+  const chip = await chipState(700);
+  check(chip && chip.top > amountRect.bottom && chip.height >= 36, "selection button appears under 1.234,56 €", JSON.stringify(chip));
+  if (chip) {
+    const [x, y] = [Math.round(chip.left + chip.width / 2), Math.round(chip.top + chip.height / 2)];
+    await cmd("input.performActions", {
+      context: page,
+      actions: [{ type: "pointer", id: "mouse", actions: [{ type: "pointerMove", x, y }, { type: "pointerDown", button: 0 }, { type: "pointerUp", button: 0 }] }],
+    });
+    let tapped = null;
+    for (let i = 0; i < 25 && !(tapped && tapped.box); i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      tapped = JSON.parse(await evaluate(page, `const b = document.querySelector("cv-converter-box");
+        return JSON.stringify({box: b && b.getBoundingClientRect(), chip: !!document.querySelector("cv-converter-chip"), selection: String(getSelection())});`));
+    }
+    check(tapped.box && tapped.box.top > amountRect.bottom && !tapped.chip, "tapping the button opens the box under the selection", JSON.stringify(tapped));
+    check(tapped.selection === "1.234,56 €", "the tap keeps the selection", JSON.stringify(tapped.selection));
+    check(!(await chipState(700)), "no button again for the amount just converted");
+    await shot(page, "android-button-box.png");
+  }
+  await evaluate(page, `document.querySelector("cv-converter-box")?.remove(); getSelection().removeAllRanges(); return true;`);
 
   // 8. Privileged pages can't host the box: result goes to a notification.
   await cmd("browsingContext.navigate", { context: page, url: "about:robots", wait: "complete" });

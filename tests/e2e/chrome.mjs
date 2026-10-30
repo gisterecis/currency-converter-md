@@ -1,7 +1,9 @@
 // End-to-end check of the Chrome build in headless Chromium over the DevTools
 // protocol: loads dist/chrome, fetches every bank's rates in the service
 // worker, checks the static menu, renders the box and switches banks in it,
-// and checks the notification fallback and the settings page.
+// and checks the notification fallback and the settings page. On an emulated
+// phone it checks Firefox for Android's selection button and the box under
+// touch and pinch-zoom.
 // With --store it also saves the Chrome Web Store screenshots (1280×800) to
 // store/screenshots/.
 // Usage: node scripts/build.mjs && node tests/e2e/chrome.mjs [outDir] [--store]
@@ -185,6 +187,52 @@ async function clickNode(session, node, dx = 0, dy = 0) {
   const y = (y1 + y3) / 2 + dy;
   for (const type of ["mousePressed", "mouseReleased"]) await cmd("Input.dispatchMouseEvent", { type, x, y, button: "left", clickCount: 1 }, session);
   return { x, y };
+}
+
+// A page on an emulated phone: touch, mobile viewport (meta viewport applies).
+async function openPhone(url) {
+  const { targetId } = await cmd("Target.createTarget", { url: "about:blank" });
+  const { sessionId } = await cmd("Target.attachToTarget", { targetId, flatten: true });
+  await cmd("Emulation.setDeviceMetricsOverride", { width: 412, height: 915, deviceScaleFactor: 2.625, mobile: true }, sessionId);
+  await cmd("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 }, sessionId);
+  await cmd("Page.navigate", { url }, sessionId);
+  for (let i = 0; i < 50; i++) {
+    const ready = await evaluate(sessionId, `return location.href === ${JSON.stringify(url)} && document.readyState === "complete";`).catch(() => false);
+    if (ready) break;
+    await sleep(100);
+  }
+  return { targetId, sessionId };
+}
+
+// A finger tap. (Input.synthesizeTapGesture sends no mouse events or click
+// under headless emulation; a real phone does.)
+async function tap(session, x, y) {
+  await cmd("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y }] }, session);
+  await cmd("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] }, session);
+}
+
+// Where the selection button and the box are, on screen: rects in CSS pixels
+// times the pinch-zoom scale, plus the visible part of the page.
+async function phoneLayout(session) {
+  return JSON.parse(await evaluate(
+    session,
+    `const rect = (sel) => { const el = document.querySelector(sel); return el && el.getBoundingClientRect().toJSON(); };
+     const vv = visualViewport;
+     return JSON.stringify({ chip: rect("cv-converter-chip"), box: rect("cv-converter-box"), scale: vv.scale,
+       view: { left: vv.offsetLeft, top: vv.offsetTop, width: vv.width, height: vv.height }, scrollY });`
+  ));
+}
+
+// The selection button's shadow root is closed too.
+async function chipButton(session) {
+  const { root } = await cmd("DOM.getDocument", { depth: -1, pierce: true }, session);
+  let found = null;
+  (function walk(n, inChip) {
+    if (n.nodeName === "CV-CONVERTER-CHIP") inChip = true;
+    if (inChip && n.nodeName === "BUTTON") found = n;
+    for (const c of [...(n.children || []), ...(n.shadowRoots || [])]) walk(c, inChip);
+  })(root, false);
+  return found;
 }
 
 async function selectText(session, text) {
@@ -387,8 +435,93 @@ try {
   check(!!text && saved.selection === "250" && saved.src === "EUR" && saved.dst === "MDL", "popup re-converts as you type and remembers it", JSON.stringify(saved));
   await shot(popup.sessionId, "chrome-popup-ro.png");
 
-  // 9. Store screenshots per language: two conversions on the demo shop page,
-  //    and the toolbar popup composited over it where Chrome opens it.
+  // 9. Phone. Firefox for Android has no context menu, so there content/chip.js
+  //    shows a button under a selected amount. Chromium's mobile emulation
+  //    stands in for the phone (touch, mobile viewport, pinch-zoom). Chrome has
+  //    menus, so the background doesn't register the button: inject it here.
+  await setSettings({ lang: "ro", bank: "maib" });
+  const injectChip = (url) =>
+    bgEval(`const tab = (await chrome.tabs.query({})).find((t) => t.url === ${JSON.stringify(url)});
+      await chrome.scripting.executeScript({target: {tabId: tab.id}, files: ["lib/parse.js", "content/chip.js"]}); return true;`);
+  const convertIn = (url, selection) =>
+    bgEval(`const tab = (await chrome.tabs.query({})).find((t) => t.url === ${JSON.stringify(url)});
+      return convertSelection(${JSON.stringify(selection)}, tab, 0);`);
+  const onScreen = (rect, scale) => rect && { width: Math.round(rect.width * scale), height: Math.round(rect.height * scale) };
+  const PHONE = `${PAGE}?phone`;
+  const phone = await openPhone(PHONE);
+  await injectChip(PHONE);
+
+  check(await selectText(phone.sessionId, "1.234,56 €"), "phone: selected 1.234,56 €");
+  let button = await waitFor(() => chipButton(phone.sessionId), 3000);
+  const buttonText = button && (await callOn(phone.sessionId, button, "function () { return this.textContent; }"));
+  let layout = await phoneLayout(phone.sessionId);
+  check(buttonText === "1.234,56 EUR" && layout.chip && layout.chip.right <= 412 && layout.chip.left >= 0, "phone: button under the amount", `${JSON.stringify(buttonText)} ${JSON.stringify(layout.chip)}`);
+  await shot(phone.sessionId, "phone-button.png");
+
+  const { model } = await cmd("DOM.getBoxModel", { backendNodeId: button.backendNodeId }, phone.sessionId);
+  await tap(phone.sessionId, (model.border[0] + model.border[2]) / 2, (model.border[1] + model.border[5]) / 2);
+  text = await waitFor(() => boxText(phone.sessionId));
+  layout = await phoneLayout(phone.sessionId);
+  check(text && text.includes("Numerar la sucursale") && text.includes("Vinzi EUR, primești"), "phone: tapping the button opens the box", text && text.slice(0, 100));
+  check(layout.box && layout.box.left >= 0 && layout.box.right <= 412 && !layout.chip, "phone: box fits the screen, button gone", JSON.stringify(layout.box));
+  await shot(phone.sessionId, "phone-box.png");
+
+  // Dragging the header by touch moves the box, not the page.
+  const { head: phoneHead } = await boxNodes(phone.sessionId);
+  const headBox = (await cmd("DOM.getBoxModel", { backendNodeId: phoneHead.backendNodeId }, phone.sessionId)).model.border;
+  const [hx, hy] = [headBox[0] + 60, (headBox[1] + headBox[5]) / 2];
+  await cmd("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: hx, y: hy }] }, phone.sessionId);
+  for (let dy = 20; dy <= 120; dy += 20) await cmd("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x: hx, y: hy + dy }] }, phone.sessionId);
+  await cmd("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] }, phone.sessionId);
+  const dragged = await phoneLayout(phone.sessionId);
+  check(Math.abs(dragged.box.top - layout.box.top - 120) < 3 && dragged.scrollY === layout.scrollY, "phone: dragging the header by touch moves the box", `${layout.box.top} -> ${dragged.box.top}, scrollY ${layout.scrollY} -> ${dragged.scrollY}`);
+  await sleep(600); // Chromium doesn't take a touch the instant the last one ended as a tap.
+  await tap(phone.sessionId, 20, 40);
+  check(await waitFor(async () => !(await phoneLayout(phone.sessionId)).box, 3000), "phone: a tap outside closes the box");
+
+  check(await selectText(phone.sessionId, "1 250,50"), "phone: selected 1 250,50");
+  button = await waitFor(() => chipButton(phone.sessionId), 3000);
+  check(button && (await callOn(phone.sessionId, button, "function () { return this.textContent; }")) === "1 250,50", "phone: button for a bare number");
+
+  // Pinch-zoomed in: the button and the box keep their size on screen and stay in view.
+  await evaluate(phone.sessionId, "getSelection().removeAllRanges(); return true;");
+  // (Input.synthesizePinchGesture doesn't zoom under headless emulation.)
+  await cmd("Emulation.setPageScaleFactor", { pageScaleFactor: 2.5 }, phone.sessionId);
+  await sleep(300);
+  check(await selectText(phone.sessionId, "7 500 lei"), "phone: selected 7 500 lei while zoomed in");
+  await waitFor(() => chipButton(phone.sessionId), 3000);
+  layout = await phoneLayout(phone.sessionId);
+  const zoomedChip = onScreen(layout.chip, layout.scale);
+  check(layout.scale > 2 && zoomedChip && Math.abs(zoomedChip.height - 40) <= 2, "phone: button keeps its size when zoomed in", `scale ${layout.scale.toFixed(2)}, ${JSON.stringify(zoomedChip)}`);
+  await convertIn(PHONE, "7 500 lei");
+  await waitFor(() => boxText(phone.sessionId));
+  layout = await phoneLayout(phone.sessionId);
+  const zoomedBox = onScreen(layout.box, layout.scale);
+  const inView = layout.box && layout.box.left >= layout.view.left - 1 && layout.box.right <= layout.view.left + layout.view.width + 1 && layout.box.top >= layout.view.top - 1;
+  check(layout.scale > 2 && zoomedBox && Math.abs(zoomedBox.width - 380) <= 2 && inView, "phone: box keeps its size and stays in view when zoomed in", `${JSON.stringify(zoomedBox)}, box ${JSON.stringify(layout.box)}, view ${JSON.stringify(layout.view)}`);
+  await shot(phone.sessionId, "phone-zoomed.png");
+  await cmd("Target.closeTarget", { targetId: phone.targetId });
+
+  // A desktop-only page, shown zoomed out to fit the phone.
+  const SITE = `${ORIGIN}/tests/e2e/desktop-site.html`;
+  const site = await openPhone(SITE);
+  await injectChip(SITE);
+  check(await selectText(site.sessionId, "1.299,00 €"), "desktop site: selected 1.299,00 €");
+  await waitFor(() => chipButton(site.sessionId), 3000);
+  layout = await phoneLayout(site.sessionId);
+  const smallChip = onScreen(layout.chip, layout.scale);
+  check(layout.scale < 0.6 && smallChip && Math.abs(smallChip.height - 40) <= 2, "desktop site: button readable while zoomed out", `scale ${layout.scale.toFixed(2)}, ${JSON.stringify(smallChip)}`);
+  await shot(site.sessionId, "phone-desktop-site-button.png");
+  await convertIn(SITE, "1.299,00 €");
+  text = await waitFor(() => boxText(site.sessionId));
+  layout = await phoneLayout(site.sessionId);
+  const smallBox = onScreen(layout.box, layout.scale);
+  check(text && smallBox && Math.abs(smallBox.width - 380) <= 2, "desktop site: box readable while zoomed out", `scale ${layout.scale.toFixed(2)}, ${JSON.stringify(smallBox)}`);
+  await shot(site.sessionId, "phone-desktop-site-box.png");
+  await cmd("Target.closeTarget", { targetId: site.targetId });
+
+  // 10. Store screenshots per language: two conversions on the demo shop page,
+  //     and the toolbar popup composited over it where Chrome opens it.
   if (STORE) {
     const dir = path.join(ROOT, "store", "screenshots");
     fs.rmSync(dir, { recursive: true, force: true });
