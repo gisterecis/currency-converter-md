@@ -3,7 +3,7 @@
     "message": "Currency Converter MD"
   },
   "extDescription": {
-    "message": "Select an amount, right-click and convert it at your Moldovan bank's rates: maib, MICB, Victoriabank, OTP, BNM and more."
+    "message": "Select an amount, right-click and convert it at your Moldovan bank's rate or the National Bank of Moldova's official rate."
   },
   "appName": {
     "message": "Currency converter"

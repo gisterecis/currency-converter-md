@@ -26,7 +26,7 @@ Convertor valutar MD
 Descriere scurtă
 
 ```text
-Selectează o sumă, click dreapta și convertește la cursul băncii tale: maib, MICB, Victoriabank, OTP, BNM și altele.
+Selectează o sumă, click dreapta și convertește la cursul băncii tale din Moldova sau la cursul oficial BNM.
 ```
 
 Descriere
@@ -44,9 +44,9 @@ Click pe un rezultat îl copiază. Suma se poate modifica direct în fereastră.
 
 Pe Firefox pentru Android: selectează suma și deschide convertorul din meniul Firefox, la Extensii. Dacă vrei, activează un buton care apare direct sub suma selectată, pe orice site.
 
-Bănci: maib, Moldindconbank, Victoriabank, OTP Bank, ProCredit Bank, FinComBank, Eximbank, Energbank, Comerțbank, EuroCreditBank, plus cursul oficial BNM (40 de valute). Alegi banca în setări sau direct din fereastră.
+Cursurile băncilor din Moldova și cursul oficial al BNM (40 de valute). Alegi banca în setări sau direct din fereastră.
 
-Recunoaște formatele 1.234,56 · 1,234.56 · 1 234,56 și valutele scrise cu simbol, cod sau cuvânt (€, $, lei, dolari, евро, руб.). Când separatorul e ambiguu (1,234), arată ambele variante.
+Recunoaște formatele 1.234,56 · 1,234.56 · 1 234,56 și valutele scrise cu simbol, cod sau cuvânt (€, $, lei). Când separatorul e ambiguu (1,234), arată ambele variante.
 
 Interfață în română, engleză și rusă.
 
@@ -64,7 +64,7 @@ Currency Converter MD
 Short description
 
 ```text
-Select an amount, right-click and convert it at your Moldovan bank's rates: maib, MICB, Victoriabank, OTP, BNM and more.
+Select an amount, right-click and convert it at your Moldovan bank's rate or the National Bank of Moldova's official rate.
 ```
 
 Description
@@ -82,9 +82,9 @@ Click a result to copy it, or edit the amount right in the box. The toolbar butt
 
 On Firefox for Android, select the amount and open the converter from the Firefox menu, under Extensions. If you like, turn on a button that appears right under the selected amount on any site.
 
-Banks: maib, Moldindconbank, Victoriabank, OTP Bank, ProCredit Bank, FinComBank, Eximbank, Energbank, Comerțbank, EuroCreditBank, plus the National Bank of Moldova's official rate (40 currencies). Pick your bank in the settings or straight from the box.
+Rates of the banks in Moldova and the National Bank of Moldova's official rate (40 currencies). Pick your bank in the settings or straight from the box.
 
-Understands 1.234,56 · 1,234.56 · 1 234,56 and currencies written as symbols, codes or words (€, $, lei, dolari, евро, руб.). When the separator is ambiguous (1,234) it shows both readings.
+Understands 1.234,56 · 1,234.56 · 1 234,56 and currencies written as symbols, codes or words (€, $, lei). When the separator is ambiguous (1,234) it shows both readings.
 
 Interface in Romanian, English and Russian.
 
@@ -102,7 +102,7 @@ Rates are read directly from the banks' websites, kept for an hour, and are for 
 Краткое описание
 
 ```text
-Выделите сумму, нажмите правой кнопкой и конвертируйте по курсу вашего банка: maib, MICB, Victoriabank, OTP, НБМ и др.
+Выделите сумму, нажмите правой кнопкой и конвертируйте по курсу вашего банка в Молдове или по официальному курсу НБМ.
 ```
 
 Описание
@@ -120,9 +120,9 @@ Rates are read directly from the banks' websites, kept for an hour, and are for 
 
 В Firefox для Android выделите сумму и откройте конвертер из меню Firefox, в разделе «Расширения». При желании включите кнопку, которая появляется прямо под выделенной суммой на любом сайте.
 
-Банки: maib, Moldindconbank, Victoriabank, OTP Bank, ProCredit Bank, FinComBank, Eximbank, Energbank, Comerțbank, EuroCreditBank, а также официальный курс НБМ (40 валют). Банк выбирается в настройках или прямо в окошке.
+Курсы банков Молдовы и официальный курс НБМ (40 валют). Банк выбирается в настройках или прямо в окошке.
 
-Понимает форматы 1.234,56 · 1,234.56 · 1 234,56 и валюты в виде символа, кода или слова (€, $, lei, dolari, евро, руб.). Если разделитель неоднозначен (1,234), показывает оба варианта.
+Понимает форматы 1.234,56 · 1,234.56 · 1 234,56 и валюты в виде символа, кода или слова (€, $, lei). Если разделитель неоднозначен (1,234), показывает оба варианта.
 
 Интерфейс на румынском, английском и русском.
 
