@@ -195,10 +195,10 @@
     "message": "Trimite rapoarte anonime de erori"
   },
   "optReportsHelp": {
-    "message": "Când cursul unei bănci nu poate fi citit (de obicei pentru că banca și-a schimbat pagina), extensia îi trimite autorului un raport anonim, ca eroarea să fie reparată repede: banca, tipul erorii și versiunile extensiei și ale browserului. Nu trimite textul selectat, paginile vizitate sau date despre tine."
+    "message": "Când cursul unei bănci nu poate fi citit (de obicei pentru că banca și-a schimbat pagina), extensia îi trimite autorului un raport anonim, ca eroarea să fie reparată repede: banca, tipul erorii și versiunile extensiei și ale browserului. Nu trimite textul selectat, paginile vizitate sau date despre tine. Activat implicit."
   },
   "optPrivacy": {
-    "message": "Textul selectat este procesat doar în browserul tău. Rapoartele de erori, dacă le activezi, nu conțin date personale."
+    "message": "Textul selectat este procesat doar în browserul tău. Rapoartele de erori nu conțin date personale și le poți dezactiva aici."
   },
   "updatedAgo": {
     "message": "actualizat $1"

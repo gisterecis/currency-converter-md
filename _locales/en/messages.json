@@ -195,10 +195,10 @@
     "message": "Send anonymous error reports"
   },
   "optReportsHelp": {
-    "message": "When a bank's rates can't be read (usually because the bank changed its page), the extension sends the developer an anonymous report so it gets fixed quickly: the bank, the kind of error, and the extension and browser versions. It never sends the selected text, the pages you visit or anything about you."
+    "message": "When a bank's rates can't be read (usually because the bank changed its page), the extension sends the developer an anonymous report so it gets fixed quickly: the bank, the kind of error, and the extension and browser versions. It never sends the selected text, the pages you visit or anything about you. On by default."
   },
   "optPrivacy": {
-    "message": "The selected text is processed only in your browser. Error reports, if you turn them on, contain no personal data."
+    "message": "The selected text is processed only in your browser. Error reports contain no personal data, and you can turn them off here."
   },
   "updatedAgo": {
     "message": "updated $1"

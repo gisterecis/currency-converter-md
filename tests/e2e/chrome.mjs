@@ -273,6 +273,13 @@ try {
 
   check((await bgEval("return typeof DOMParser;")) === "undefined", "service worker has no DOMParser (adapters must not need it)");
 
+  // Error reports start on in Chrome; test runs must not send them to the real Sentry project.
+  const reportsDefault = JSON.parse(await bgEval("return JSON.stringify(await ErrorReport.status());"));
+  check(reportsDefault.available && !reportsDefault.builtIn && reportsDefault.enabled, "error reports are on by default", JSON.stringify(reportsDefault));
+  await setSettings({ reportErrors: false });
+  const reportsOff = JSON.parse(await bgEval("return JSON.stringify(await ErrorReport.status());"));
+  check(!reportsOff.enabled, "error reports can be turned off", JSON.stringify(reportsOff));
+
   // 2. Every bank, live, from the service worker.
   await bgEval("await chrome.storage.local.clear(); return true;");
   for (const id of await bgEval("return Banks.ORDER;")) {
