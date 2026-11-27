@@ -207,6 +207,13 @@ try {
      return JSON.stringify({ro: ro.strings.optBank, ru: ru.strings.optBank, kept});`
   ));
   check(lang.ru === "Банк, курс которого вы используете" && lang.kept.lang === "ru" && lang.kept.bank === "procredit", "settings save and ignore bad values", JSON.stringify(lang));
+
+  // Error reports: Firefox's own data consent decides, and it starts off.
+  const reports = JSON.parse(await bgEval(
+    `return JSON.stringify({status: await bg.ErrorReport.status(), perms: await browser.permissions.getAll()});`
+  ));
+  check(reports.status.available && reports.status.builtIn && !reports.status.enabled && Array.isArray(reports.perms.data_collection),
+    "error reports use Firefox's data consent and start off", JSON.stringify(reports));
   const switched = JSON.parse(await bgEval(
     `const m = await bg.convertFromBox({request: {selection: "100 EUR", src: "EUR", dst: "MDL", bank: "victoriabank"}});
      return JSON.stringify({bank: m.bank.id, saved: (await bg.getSettings()).bank, sections: m.readings[0].sections.map((s) => s.key), first: m.readings[0].sections[0].rows[0]});`
