@@ -32,6 +32,9 @@
   "cat_online": {
     "message": "Online / mobile app"
   },
+  "cat_transfer": {
+    "message": "Account transfers"
+  },
   "cat_official": {
     "message": "BNM official rate"
   },
@@ -43,6 +46,9 @@
   },
   "short_online": {
     "message": "Online"
+  },
+  "short_transfer": {
+    "message": "Transfer"
   },
   "short_official": {
     "message": "BNM"
@@ -185,8 +191,14 @@
   "optDisclaimer": {
     "message": "Rates are read from the banks' websites and are for information only; the bank's rate at the time of the transaction applies. This extension is not affiliated with any bank."
   },
+  "optReports": {
+    "message": "Send anonymous error reports"
+  },
+  "optReportsHelp": {
+    "message": "When a bank's rates can't be read (usually because the bank changed its page), the extension sends the developer an anonymous report so it gets fixed quickly: the bank, the kind of error, and the extension and browser versions. It never sends the selected text, the pages you visit or anything about you."
+  },
   "optPrivacy": {
-    "message": "The extension collects no data: the selected text is processed only in your browser."
+    "message": "The selected text is processed only in your browser. Error reports, if you turn them on, contain no personal data."
   },
   "updatedAgo": {
     "message": "updated $1"

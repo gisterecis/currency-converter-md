@@ -41,7 +41,7 @@ test("every key the code uses exists", () => {
       for (const k of list[1].matchAll(/"([A-Za-z_]+)"/g)) used.add(k[1]);
     }
   }
-  for (const key of ["cash", "card", "online", "official"]) used.add(`cat_${key}`).add(`short_${key}`);
+  for (const key of ["cash", "card", "online", "transfer", "official"]) used.add(`cat_${key}`).add(`short_${key}`);
   assert.ok(used.has("copied") && used.has("optShortcut"), "string lists were found");
   for (const k of used) assert.ok(ro[k], `missing message ${k}`);
 });

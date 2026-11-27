@@ -21,8 +21,10 @@ const BODIES = {
 
 // [bank, date, table, code, buy, sell]
 const EXPECT = [
-  ["maib", "29.10.2026", "cash", "EUR", 19.9, 20.2],
-  ["maib", "29.10.2026", "card", "USD", 17.711, 18.3212],
+  ["maib", "27.11.2026", "cash", "EUR", 20.03, 20.28],
+  ["maib", "27.11.2026", "card", "USD", 18.1389, 18.6227],
+  ["maib", "27.11.2026", "online", "GBP", 23.9175, 24.2325],
+  ["maib", "27.11.2026", "transfer", "UAH", 0.3, 0.45],
   ["micb", null, "cash", "GBP", 23.6, 24.1],
   ["micb", null, "card", "EUR", 19.85, 20.45],
   ["victoriabank", "29.10.2026", "cash", "EUR", 20.03, 20.24],

@@ -159,6 +159,9 @@ mkdir -p "$OUT/store"
 cp store/listing.md store/chrome-web-store.md docs/privacy-policy.html store/promo-440x280.png "$OUT/store/"
 cp -R store/screenshots "$OUT/store/screenshots"
 cp icons/icon-128.png "$OUT/store/icon-128.png"
+if ! grep -qE 'const DSN = "https://' lib/report.js; then
+  warn "lib/report.js has no Sentry DSN: this build sends no error reports and hides the setting"
+fi
 if grep -q CONTACT_EMAIL docs/privacy-policy.html; then
   warn "docs/privacy-policy.html still has CONTACT_EMAIL placeholders; fill them in before hosting it"
 fi

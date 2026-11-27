@@ -141,7 +141,7 @@ try {
   const direct = await evaluate(
     harness,
     `const r = await fetch("https://www.maib.md/ro/curs-valutar", {credentials: "include", cache: "no-store"});
-     const t = await r.text(); return JSON.stringify({status: r.status, len: t.length, hasTable: t.includes("one-one-new")});`
+     const t = await r.text(); return JSON.stringify({status: r.status, len: t.length, hasTable: t.includes("sucursale-agentii-one")});`
   );
   console.log("direct maib fetch on fresh profile:", direct);
 
@@ -161,7 +161,7 @@ try {
   const viaTab = JSON.parse(await bgEval(
     `const req = bg.Banks.get("maib").requests()[0];
      const t0 = Date.now(); const html = await bg.BankRates.fetchViaTab(req);
-     return JSON.stringify({ok: html.includes("one-one-new"), ms: Date.now() - t0, tabs: (await browser.tabs.query({})).length});`
+     return JSON.stringify({ok: html.includes("sucursale-agentii-one"), ms: Date.now() - t0, tabs: (await browser.tabs.query({})).length});`
   ));
   check(viaTab.ok && viaTab.tabs === 1, "tab fallback scrapes the page and closes its tab", JSON.stringify(viaTab));
 
@@ -297,8 +297,11 @@ try {
   // 7c. Firefox for Android's button under a selected amount (content/chip.js).
   //     Desktop has menus, so the background doesn't register it: inject it.
   //     The Chrome run covers touch and pinch-zoom.
-  await setSettings({ bank: "maib", lang: "ro" });
+  // A bank with two rate types and a taller window, so the box has room under
+  // the selection (otherwise it's clamped into view, over the selection).
+  await setSettings({ bank: "victoriabank", lang: "ro" });
   await cmd("browsingContext.activate", { context: page });
+  await cmd("browsingContext.setViewport", { context: page, viewport: { width: 1000, height: 1200 } });
   const chipInjected = await bgEval(
     `const tab = (await browser.tabs.query({})).find((t) => t.url && t.url.startsWith(${JSON.stringify(PAGE)}));
      const [r] = await bg.browser.scripting.executeScript({target: {tabId: tab.id}, files: ["lib/parse.js", "content/chip.js"]});
@@ -342,6 +345,7 @@ try {
     await shot(page, "android-button-box.png");
   }
   await evaluate(page, `document.querySelector("cv-converter-box")?.remove(); getSelection().removeAllRanges(); return true;`);
+  await cmd("browsingContext.setViewport", { context: page, viewport: { width: 1000, height: 760 } });
 
   // 8. Privileged pages can't host the box: result goes to a notification.
   await cmd("browsingContext.navigate", { context: page, url: "about:robots", wait: "complete" });
