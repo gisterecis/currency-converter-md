@@ -8,9 +8,9 @@ const ext = Ext.api;
 const ROOT_ID = "cv-root";
 // lastForeign: the foreign currency last converted to or from MDL, used by
 // the keyboard shortcut for amounts in lei.
-// reportErrors: consent to error reports where the browser has no built-in
-// data consent (Chrome); see lib/report.js.
-const DEFAULTS = { bank: Banks.DEFAULT, lang: "auto", lastForeign: "EUR", reportErrors: false };
+// reportErrors: error reports where the browser has no built-in data consent
+// (Chrome); on unless the user turns them off. See lib/report.js.
+const DEFAULTS = { bank: Banks.DEFAULT, lang: "auto", lastForeign: "EUR", reportErrors: true };
 
 // ---------------------------------------------------------------------------
 // Settings and strings

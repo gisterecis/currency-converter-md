@@ -6,8 +6,8 @@ const { ErrorReport, Scrape } = globalThis;
 const DSN = "https://0123456789abcdef0123456789abcdef@o1.ingest.de.sentry.io/4500000000000001";
 
 // A stand-in browser: storage, optional Firefox data consent, and fetch.
-function fakeBrowser({ dataCollection, reportErrors = false } = {}) {
-  const store = { local: {}, sync: { reportErrors } };
+function fakeBrowser({ dataCollection, reportErrors } = {}) {
+  const store = { local: {}, sync: reportErrors === undefined ? {} : { reportErrors } };
   const area = (name) => ({
     get: async (keys) => {
       if (typeof keys === "string") return keys in store[name] ? { [keys]: store[name][keys] } : {};
@@ -50,7 +50,15 @@ test("the DSN turns into Sentry's envelope endpoint", () => {
   assert.equal(ErrorReport.parseDsn("http://key@host/1"), null);
 });
 
-test("nothing is sent without consent", async () => {
+test("without a browser consent, reports are on until the user turns them off", async () => {
+  await withBrowser({}, async (b) => {
+    assert.deepEqual(await ErrorReport.status(DSN), { available: true, builtIn: false, enabled: true });
+    assert.equal(await ErrorReport.bankFailure("maib", layout(), { dsn: DSN }), true);
+    assert.equal(b.sent.length, 1);
+  });
+});
+
+test("nothing is sent once the user turns reports off", async () => {
   await withBrowser({ dataCollection: [] }, async (b) => {
     assert.equal(await ErrorReport.bankFailure("maib", layout(), { dsn: DSN }), false);
     assert.equal(b.sent.length, 0);

@@ -145,6 +145,9 @@ try {
   );
   console.log("direct maib fetch on fresh profile:", direct);
 
+  // Test runs must not send error reports to the real Sentry project.
+  await bgEval(`await browser.permissions.remove({data_collection: ["technicalAndInteraction"]}); return true;`);
+
   // 2. Live rates from banks with different source types (HTML behind a bot
   //    check, JSON APIs, plain HTML, XML).
   await bgEval(`await browser.storage.local.clear(); return true;`);
@@ -208,12 +211,12 @@ try {
   ));
   check(lang.ru === "Банк, курс которого вы используете" && lang.kept.lang === "ru" && lang.kept.bank === "procredit", "settings save and ignore bad values", JSON.stringify(lang));
 
-  // Error reports: Firefox's own data consent decides, and it starts off.
+  // Error reports: Firefox's own data consent decides (switched off above for the tests).
   const reports = JSON.parse(await bgEval(
     `return JSON.stringify({status: await bg.ErrorReport.status(), perms: await browser.permissions.getAll()});`
   ));
   check(reports.status.available && reports.status.builtIn && !reports.status.enabled && Array.isArray(reports.perms.data_collection),
-    "error reports use Firefox's data consent and start off", JSON.stringify(reports));
+    "error reports follow Firefox's data consent", JSON.stringify(reports));
   const switched = JSON.parse(await bgEval(
     `const m = await bg.convertFromBox({request: {selection: "100 EUR", src: "EUR", dst: "MDL", bank: "victoriabank"}});
      return JSON.stringify({bank: m.bank.id, saved: (await bg.getSettings()).bank, sections: m.readings[0].sections.map((s) => s.key), first: m.readings[0].sections[0].rows[0]});`

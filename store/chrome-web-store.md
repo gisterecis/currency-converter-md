@@ -41,7 +41,8 @@ tests, lints and checks it; `npm run build:chrome` alone puts it in `web-ext-art
 
 **Data usage:** tick nothing. The extension collects no user data in the Web Store's categories. The selected text
 is parsed locally and never leaves the browser; rate requests are GETs for public rate pages and carry no user data.
-The only other request is the optional, off-by-default error report (settings → "Send anonymous error reports"): when
+The only other request is the anonymous error report, on by default and switchable off in settings ("Send anonymous
+error reports"): when
 a bank's rates can't be read it sends Sentry the bank, the error type, and the extension and browser versions, with no
 identifiers, page content, browsing data or IP storage. That is diagnostics, not user data, but say so if a reviewer
 asks. Certify the three statements (no selling, no unrelated use, no creditworthiness use).

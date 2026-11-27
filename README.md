@@ -42,13 +42,16 @@ subdomains keeps the banks' other subdomains, where internet banking usually liv
 
 When a bank's rates can't be read (its page changed or moved, or its bot check stops letting browsers through), the
 extension can send an anonymous report to [Sentry](https://sentry.io), so a broken bank shows up there before users
-complain. It's off until the user turns it on:
+complain. It's on by default, and users can turn it off:
 
-- **Firefox** (desktop and Android) asks with its built-in data consent: the add-on declares
-  `technicalAndInteraction` as optional data collection, which Firefox offers at install and in
-  about:addons → Permissions. The settings page toggles the same permission.
-- **Chrome** has no such prompt, so the settings page has a switch, **Send anonymous error reports**, off by
+- **Firefox** (desktop and Android) uses its built-in data consent: the add-on declares `technicalAndInteraction`
+  as optional data collection, which Firefox's install prompt shows switched on, and which users can change in
+  about:addons → Permissions. The settings page toggles the same permission. Temporarily loaded copies (`web-ext
+  run`, e2e) and updates from a version without it don't get it automatically.
+- **Chrome** has no such prompt, so the settings page has a switch, **Send anonymous error reports**, on by
   default.
+
+The e2e tests switch reports off before fetching anything, so test runs don't reach the real Sentry project.
 
 A report holds the bank, the error code (`layout`, `http`, `blocked`, `timeout`, `generic`), the adapter's message (for
 example `cash table not found`), the extension version and the browser name and version. It's one `text/plain` POST
@@ -98,7 +101,7 @@ fixed version stops producing them.
 - **Settings** (⚙, the menu's last item, or the browser's extension settings):
   - The bank.
   - The language: Automatic follows the browser and falls back to Romanian; or pick Română, English or Русский.
-  - Anonymous error reports (see [Error reports](#error-reports)).
+  - Anonymous error reports, on by default (see [Error reports](#error-reports)).
 - **Number formats** it understands: `1.234,56`, `1,234.56`, `1 234,56` (including non-breaking and narrow spaces),
   `1'234.50`, and a leading `-`. For ambiguous separators (`1,234` or `1.500`) the box offers both readings to
   pick from.
