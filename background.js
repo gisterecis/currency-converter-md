@@ -1,4 +1,4 @@
-/* global Ext, I18n, Banks, BankRates, CurrencyParse, CurrencyConvert */
+/* global Ext, I18n, Banks, BankRates, CurrencyParse, CurrencyConvert, ErrorReport */
 "use strict";
 
 // Runs as the Firefox background page and inside Chrome's service worker
@@ -8,7 +8,9 @@ const ext = Ext.api;
 const ROOT_ID = "cv-root";
 // lastForeign: the foreign currency last converted to or from MDL, used by
 // the keyboard shortcut for amounts in lei.
-const DEFAULTS = { bank: Banks.DEFAULT, lang: "auto", lastForeign: "EUR" };
+// reportErrors: consent to error reports where the browser has no built-in
+// data consent (Chrome); see lib/report.js.
+const DEFAULTS = { bank: Banks.DEFAULT, lang: "auto", lastForeign: "EUR", reportErrors: false };
 
 // ---------------------------------------------------------------------------
 // Settings and strings
@@ -28,6 +30,7 @@ async function saveSettings(changes) {
   if (changes.bank && Banks.get(changes.bank)) clean.bank = changes.bank;
   if (changes.lang === "auto" || I18n.LANGS.includes(changes.lang)) clean.lang = changes.lang;
   if (/^[A-Z]{3}$/.test(changes.lastForeign || "") && changes.lastForeign !== "MDL") clean.lastForeign = changes.lastForeign;
+  if (typeof changes.reportErrors === "boolean") clean.reportErrors = changes.reportErrors;
   if (Object.keys(clean).length) await settingsArea().set(clean);
 }
 
@@ -406,11 +409,12 @@ async function optionsData() {
   const keys = [
     "optionsTitle", "optIntro", "optBank", "optLang", "optLangAuto", "optSaved", "optDisclaimer", "optPrivacy", "appName",
     "optShortcut", "optShortcutHelp", "optShortcutNone", "optShortcutChange", "optAbout", "extName", "optChip", "optChipHelp",
+    "optReports", "optReportsHelp",
   ];
   const strings = Object.fromEntries(keys.map((k) => [k, t(k)]));
   // No right-click on Android: the intro points at the selection button.
   if (!Ext.menus) strings.optIntro = t("optIntroTouch");
-  return { settings, lang, banks: bankList(t), strings };
+  return { settings, lang, banks: bankList(t), strings, reports: await ErrorReport.status() };
 }
 
 Ext.onMessage((msg, sender) => {

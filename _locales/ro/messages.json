@@ -32,6 +32,9 @@
   "cat_online": {
     "message": "Online / aplicație"
   },
+  "cat_transfer": {
+    "message": "Transferuri între conturi"
+  },
   "cat_official": {
     "message": "Cursul oficial BNM"
   },
@@ -43,6 +46,9 @@
   },
   "short_online": {
     "message": "Online"
+  },
+  "short_transfer": {
+    "message": "Transfer"
   },
   "short_official": {
     "message": "BNM"
@@ -185,8 +191,14 @@
   "optDisclaimer": {
     "message": "Cursurile sunt preluate de pe site-urile băncilor și au caracter informativ. La tranzacție se aplică cursul băncii din acel moment. Extensia nu este afiliată cu nicio bancă."
   },
+  "optReports": {
+    "message": "Trimite rapoarte anonime de erori"
+  },
+  "optReportsHelp": {
+    "message": "Când cursul unei bănci nu poate fi citit (de obicei pentru că banca și-a schimbat pagina), extensia îi trimite autorului un raport anonim, ca eroarea să fie reparată repede: banca, tipul erorii și versiunile extensiei și ale browserului. Nu trimite textul selectat, paginile vizitate sau date despre tine."
+  },
   "optPrivacy": {
-    "message": "Extensia nu colectează date: textul selectat este procesat doar în browserul tău."
+    "message": "Textul selectat este procesat doar în browserul tău. Rapoartele de erori, dacă le activezi, nu conțin date personale."
   },
   "updatedAgo": {
     "message": "actualizat $1"

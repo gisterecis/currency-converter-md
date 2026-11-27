@@ -3,7 +3,7 @@
 A browser extension for Firefox (desktop and Android) and Chrome. Select an amount on any page, right-click (on
 Android, open it from the Firefox menu), and convert it at the exchange rates of your Moldovan bank. The result
 opens in a small box next to the selection. For each of the bank's rate types (cash at branches, card operations
-and, where the bank publishes it, online/app), it shows what you get when you sell the amount and what you pay when
+and, where the bank publishes them, online/app and account transfers), it shows what you get when you sell the amount and what you pay when
 you buy it.
 
 The interface is in Romanian (the default), English and Russian.
@@ -14,7 +14,7 @@ All 10 banks licensed by the BNM (October 2026), plus the BNM official rate:
 
 | Bank | Rates | Source |
 | --- | --- | --- |
-| maib | cash, card | `maib.md/ro/curs-valutar` (behind a bot check, see below) |
+| maib | cash, card, online (FX maibank), account transfers | `maib.md/ro/curs-valutar` (behind a bot check, see below) |
 | Moldindconbank | cash, card | `micb.md` homepage |
 | Victoriabank | cash, online | JSON API behind `victoriabank.md/curs-valutar` |
 | OTP Bank | cash, card | `otpbank.md/exchange` |
@@ -37,6 +37,34 @@ tables, and closes the tab.
 The extension asks for one exact host per bank (`www.maib.md`, `micb.md`, …), the one its public rate page is on.
 Browsers ignore the path in a host permission, so a single page can't be requested, but leaving out wildcard
 subdomains keeps the banks' other subdomains, where internet banking usually lives, out of reach.
+
+## Error reports
+
+When a bank's rates can't be read (its page changed or moved, or its bot check stops letting browsers through), the
+extension can send an anonymous report to [Sentry](https://sentry.io), so a broken bank shows up there before users
+complain. It's off until the user turns it on:
+
+- **Firefox** (desktop and Android) asks with its built-in data consent: the add-on declares
+  `technicalAndInteraction` as optional data collection, which Firefox offers at install and in
+  about:addons → Permissions. The settings page toggles the same permission.
+- **Chrome** has no such prompt, so the settings page has a switch, **Send anonymous error reports**, off by
+  default.
+
+A report holds the bank, the error code (`layout`, `http`, `blocked`, `timeout`, `generic`), the adapter's message (for
+example `cash table not found`), the extension version and the browser name and version. It's one `text/plain` POST
+without cookies to Sentry's envelope endpoint, with `infer_ip: "never"`, and at most one a day per bank, error and
+version for each install. Offline (`network`) and rate limits (`busy`) aren't reported. `lib/report.js` holds the
+code and the DSN; with an empty DSN, nothing is sent and the setting is hidden.
+
+**Setting up Sentry** (free Developer plan):
+1. Create a project of type **Browser JavaScript**, preferably in the EU data region (the privacy policy says EU).
+2. Copy its DSN (Project Settings → Client Keys) into `const DSN` in `lib/report.js`.
+3. Project Settings → Security & Privacy: turn on **Prevent Storing of IP Addresses** and **Data Scrubber**.
+4. Alerts: the default "a new issue is created" email rule is enough. Each bank and error code is its own issue, so
+   a newly broken bank sends an email. Add the Sentry mobile app or a Slack/Discord integration for push alerts.
+
+Then follow **When a bank changes its site** below. Reports carry `release: convertor-valutar-md@<version>`, so a
+fixed version stops producing them.
 
 ## Using it
 
@@ -70,6 +98,7 @@ subdomains keeps the banks' other subdomains, where internet banking usually liv
 - **Settings** (⚙, the menu's last item, or the browser's extension settings):
   - The bank.
   - The language: Automatic follows the browser and falls back to Romanian; or pick Română, English or Русский.
+  - Anonymous error reports (see [Error reports](#error-reports)).
 - **Number formats** it understands: `1.234,56`, `1,234.56`, `1 234,56` (including non-breaking and narrow spaces),
   `1'234.50`, and a leading `-`. For ambiguous separators (`1,234` or `1.500`) the box offers both readings to
   pick from.
@@ -128,6 +157,7 @@ The repo root is the Firefox add-on. `scripts/build.mjs` builds the Chrome versi
 | `lib/banks/*.js` | one adapter per bank: what to fetch and how to read it (`registry.js` documents the shape) |
 | `lib/scrape.js` | string helpers for adapters (Chrome's service worker has no `DOMParser`) |
 | `lib/rates.js` | fetching, the one-hour cache, the background-tab fallback |
+| `lib/report.js` | optional anonymous error reports to Sentry when a bank can't be read |
 | `lib/i18n.js`, `_locales/` | ro/en/ru strings and language choice |
 | `lib/ext.js` | Firefox/Chrome API differences |
 | `background.js` | menus, settings, results to the box or a notification |
@@ -141,10 +171,15 @@ The repo root is the Firefox add-on. `scripts/build.mjs` builds the Chrome versi
 
 ### When a bank changes its site
 
-The box will say "pagina … s-a schimbat" (the page layout changed). To fix it:
+Sentry emails you about a new issue such as `maib: layout`, or the box says "pagina … s-a schimbat" (the page
+layout changed). To fix it:
 1. Run `npm run check-banks <id>` to see what fails.
 2. Update `lib/banks/<id>.js`.
 3. Replace the trimmed copy in `tests/fixtures/banks/` and the expected values in `tests/banks.test.js`.
+
+For banks behind a bot check (maib, Eximbank) `check-banks` only prints SKIP. Open the page in a browser and read the
+tables from the developer console. Keep each adapter's request `marker` to something every version of the page has
+and the bot check doesn't, so a changed layout is reported as `layout` rather than waiting for the bot check to time out.
 
 ## Publishing
 

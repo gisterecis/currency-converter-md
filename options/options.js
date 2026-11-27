@@ -52,6 +52,9 @@
     $("about-label").textContent = s.optAbout;
     $("disclaimer").textContent = s.optDisclaimer;
     $("privacy").textContent = s.optPrivacy;
+    $("reports-label").textContent = s.optReports;
+    $("reports-help").textContent = s.optReportsHelp;
+    renderReports(data.reports);
     fill($("bank"), data.banks.map((b) => [b.id, b.name]), data.settings.bank);
     fill($("lang"), [["auto", s.optLangAuto], ...LANGS], data.settings.lang);
     renderShortcut(s);
@@ -83,12 +86,34 @@
     change.catch(() => {}).finally(renderChip);
   }
 
+  // Error reports. Firefox keeps the consent itself (the add-on's data
+  // collection permission, also in about:addons); request() has to run
+  // straight from the click. Elsewhere it's a setting.
+  const DATA = { data_collection: ["technicalAndInteraction"] };
+  let reports = { available: false, builtIn: false, enabled: false };
+  function renderReports(r) {
+    reports = r || reports;
+    $("reports-panel").hidden = !reports.available;
+    $("reports").checked = reports.enabled;
+  }
+  async function refreshReports() {
+    const data = await api.runtime.sendMessage({ type: "cv-options-data" });
+    renderReports(data.reports);
+  }
+  function toggleReports(e) {
+    const on = e.target.checked;
+    if (!reports.builtIn) return save({ reportErrors: on });
+    const change = on ? api.permissions.request(DATA) : api.permissions.remove(DATA);
+    change.catch(() => {}).finally(refreshReports);
+  }
+
   // Firefox for Android has no context menu and no keyboard shortcuts for add-ons.
   const android = !(api.menus || api.contextMenus);
   $("chip-panel").hidden = !android;
   if (android) renderChip();
   $("shortcut-panel").hidden = !api.commands;
   $("chip").addEventListener("change", toggleChip);
+  $("reports").addEventListener("change", toggleReports);
   $("bank").addEventListener("change", (e) => save({ bank: e.target.value }));
   $("lang").addEventListener("change", (e) => save({ lang: e.target.value }));
   $("shortcut-change").addEventListener("click", changeShortcut);

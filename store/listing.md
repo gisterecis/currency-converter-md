@@ -50,7 +50,7 @@ Recunoaște formatele 1.234,56 · 1,234.56 · 1 234,56 și valutele scrise cu si
 
 Interfață în română, engleză și rusă.
 
-Cursurile sunt preluate direct de pe site-urile băncilor, păstrate o oră și au caracter informativ: la tranzacție se aplică cursul băncii din acel moment. Extensia nu este afiliată cu nicio bancă și nu colectează date.
+Cursurile sunt preluate direct de pe site-urile băncilor, păstrate o oră și au caracter informativ: la tranzacție se aplică cursul băncii din acel moment. Extensia nu este afiliată cu nicio bancă și nu colectează date personale; rapoartele anonime de erori se trimit doar dacă le activezi.
 ```
 
 ## English
@@ -88,7 +88,7 @@ Understands 1.234,56 · 1,234.56 · 1 234,56 and currencies written as symbols, 
 
 Interface in Romanian, English and Russian.
 
-Rates are read directly from the banks' websites, kept for an hour, and are for information only: the bank's rate at the time of the transaction applies. Not affiliated with any bank. Collects no data.
+Rates are read directly from the banks' websites, kept for an hour, and are for information only: the bank's rate at the time of the transaction applies. Not affiliated with any bank. Collects no personal data; anonymous error reports are sent only if you turn them on.
 ```
 
 ## Русский
@@ -126,5 +126,5 @@ Rates are read directly from the banks' websites, kept for an hour, and are for 
 
 Интерфейс на румынском, английском и русском.
 
-Курсы берутся напрямую с сайтов банков, хранятся час и носят информационный характер: при операции действует курс банка на тот момент. Расширение не связано ни с одним банком и не собирает данные.
+Курсы берутся напрямую с сайтов банков, хранятся час и носят информационный характер: при операции действует курс банка на тот момент. Расширение не связано ни с одним банком и не собирает личные данные; анонимные отчёты об ошибках отправляются, только если вы их включите.
 ```
